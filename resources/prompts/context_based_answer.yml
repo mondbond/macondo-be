@@ -1,0 +1,16 @@
+prompt_name: context_based_answer
+versions:
+  - version: 1
+    alias: base
+    description: Initial version of summarization
+    template: |
+      Answer the question based on provided context:
+      Context: {context}
+      Question: {question}
+  - version: 2
+    alias: base_with_step_by_step
+    description: Added formal tone
+    template: |
+      Answer the question based on provided context using step by step logic:
+      Context: {context}
+      Question: {question}

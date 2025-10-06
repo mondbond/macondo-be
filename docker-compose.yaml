@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  macondo-be:
+    build: .
+    image: macondo-be:latest
+    container_name: macondo-be
+    ports:
+      - "8000:8000"
+    environment:
+      - ACTIVE_ENV=local-compose
+
+  macondo-ui:
+    build: ../macondo-ui
+    image: macondo-ui:latest
+    container_name: macondo-ui
+    ports:
+      - "7860:7860"
+    depends_on:
+      - macondo-be
+    environment:
+      - ACTIVE_ENV=local-compose

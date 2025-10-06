@@ -1,0 +1,71 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+*.egg
+*.eggs/
+dist/
+build/
+*.log
+*.sqlite
+*.db
+*.sqlite3
+
+# Poetry
+poetry.lock
+
+# macOS
+.DS_Store
+
+# IDEs
+*.iml
+.idea/
+.vscode/
+
+# Docker
+# (Usually tracked, but ignore build artifacts if any)
+
+# Environment
+.env
+.env.*
+
+# Misc
+*.swp
+*.swo
+
+# Resources
+resources/prompts/*.yml
+
+# Ignore compiled files
+src/**/__pycache__/
+src/**/*.pyc
+
+# Ignore test cache
+.pytest_cache/
+
+# Ignore coverage reports
+htmlcov/
+.coverage
+.coverage.*
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore tools
+src/tools/__pycache__/
+
+# Ignore models
+src/models/__pycache__/
+
+# Ignore service
+src/service/__pycache__/
+
+# Ignore util
+src/util/__pycache__/
+

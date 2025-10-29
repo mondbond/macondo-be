@@ -1,0 +1,17 @@
+prompt_name: trim_chat_history
+description: prompt to trim chat history to fit into the token limit
+versions:
+  - version: 1
+    alias: base
+    description:
+    template: |
+      You are provided with the chat history between the user and the system. The history chat is to long to fit into the character limit. You need to trim the chat history to fit into the character limit.
+      Character limit: {character_limit}
+      Steps how to trim the chat history:
+        1 - You can skip not relevant messages from the chat history. Keep relevant messages only.
+        2 - You can summarise the messages to one paragraph shortly describing topic of conversation.
+        3 - You need to remember the context of the conversation and keep the context in the trimmed chat history.
+        4 - You need to keep the most recent messages in the chat history as a priority to older messages.
+        5 - Personal data as names, locations, dates must be remembered in with the priority from the chat history.
+        Here is the chat history:
+      

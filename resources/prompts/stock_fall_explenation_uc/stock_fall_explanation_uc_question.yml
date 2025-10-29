@@ -1,0 +1,8 @@
+prompt_name: stock_fall_explanation_uc_question
+description: Fixed question to stock fall explanation use case to set up the main goal of the flow
+versions:
+  - version: 1
+    alias: base
+    description:
+    template: |
+      Does provided news can explain the share price move ? If yes - explain why the share price change using provided information and provided recent news?

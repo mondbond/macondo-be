@@ -1,0 +1,10 @@
+prompt_name: rephrase_retrieval_uc_answer
+description: Prompt to generate answer for the question.
+versions:
+  - version: 1
+    alias: base
+    description:
+    template: |
+      Given the provided data chunks, produce a concise, factual answer to the question.
+      Think step by step and explain your reasoning argumenting wich exacly parts from data you used to explain the answer.
+      Try to formulate the answer in point by point format given arguments.

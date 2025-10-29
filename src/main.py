@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Query
 
-from src.service.graph.router import start_graph, start_graph_v1
+from src.llm.llm_provider import get_llm
+from src.service.graph.router import start_graph, start_graph_v1, start_graph_v2
 from pydantic import BaseModel
 from fastapi import FastAPI, File, UploadFile
 from src.usecase import report_uc as report_use_case
@@ -17,7 +18,7 @@ async def root():
 
 @app.post("/chat/")
 async def chat_endpoint(req: ChatRequest):
-  result = start_graph_v1(req.message)
+  result = await start_graph_v2(req.message)
 
   return {"reply": f"{result}"}
 
@@ -48,3 +49,14 @@ async def delete_report(ticker: str):
   report_use_case.delete_report(ticker)
   return {}
 
+
+# Define request body model
+class Ask(BaseModel):
+  ask: str
+
+# endpoint to check llm connection
+@app.post("/ask/")
+async def ask(ask: Ask):
+  print("POST /ask/")
+  llm = get_llm()
+  return llm.invoke(ask.ask).content

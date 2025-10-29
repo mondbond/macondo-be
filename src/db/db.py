@@ -4,8 +4,8 @@ from langchain.retrievers import RePhraseQueryRetriever
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import Chroma
 from langchain_core.prompts import PromptTemplate
-from src.llm.llm_provider import llm
-from src.prompt.prompts import REPHRASE_PROMPT
+from src.llm.llm_provider import get_llm
+from src.util.prompt_manager import prompt_manager
 
 class FinReportVectorDB(abc.ABC):
 
@@ -49,11 +49,11 @@ class InMemoryFinReportVectorDBReport(FinReportVectorDB):
 
     def get_rephrased_retriever(self, type=None, ticker=None):
       template = PromptTemplate(
-          template=REPHRASE_PROMPT,
+          template=prompt_manager.get_prompt('rephrase_question_for_similarity_search'),
           input_variables=["question"])
       base_retriever = self.db.as_retriever(search_type="similarity", search_kwargs={"k": 5, "filter": {"ticker": ticker}})
 
-      retriever = RePhraseQueryRetriever.from_llm(retriever=base_retriever, llm = llm, prompt=template)
+      retriever = RePhraseQueryRetriever.from_llm(retriever=base_retriever, llm = get_llm(), prompt=template)
 
       return retriever
 
@@ -63,10 +63,10 @@ class InMemoryFinReportVectorDBReport(FinReportVectorDB):
 
     def search_report_context(self, ticker, query):
       template = PromptTemplate(
-          template=REPHRASE_PROMPT,
+          template=prompt_manager.get_prompt('rephrase_question_for_similarity_search'),
           input_variables=["question"])
       base_retriever = self.db.as_retriever(search_type="similarity", search_kwargs={"k": 5}, filter={"ticker": ticker})
-      retriever = RePhraseQueryRetriever.from_llm(retriever=base_retriever, llm = llm, prompt=template)
+      retriever = RePhraseQueryRetriever.from_llm(retriever=base_retriever, llm = get_llm(), prompt=template)
       results = retriever.invoke(query)
       return results
 

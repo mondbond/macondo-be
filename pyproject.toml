@@ -38,6 +38,9 @@ trulens-apps-langchain = "^2.4.0"
 trulens-providers-litellm = "^2.4.0"
 litellm = "^1.77.3"
 yfinance = "^0.2.66"
+boto3 = "^1.40.48"
+langchain-aws = "^0.2.35"
+langchain-mcp-adapters = "^0.1.11"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

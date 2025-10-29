@@ -9,6 +9,7 @@ from src.llm.llm_provider import get_llm
 from src.service.file_format_service import soup_html_to_text
 from src.service.query_report_service import base_query_report_question_answer
 from src.usecase.report_uc import save_text_report
+from src.util.prompt_manager import prompt_manager
 
 FETCH_NODE = "FETCH_NODE"
 ANSWER_NODE = "ANSWER_NODE"
@@ -173,7 +174,7 @@ def evaluator_node(state: SubqueryRetrievalConfig) -> SubqueryRetrievalConfig:
     })
     state["last_review"] = analysis.reasoning
     state["last_mark"] = int(analysis.comparable_numeric_value)
-  except Exception as e:
+  except Exception:
     pass
 
   return state
@@ -266,25 +267,11 @@ def run_subquery_search_in_report(ticker: str, question: str) -> str:
   "context_threshold": 4000,
   "compression_coef": 0.7,
 
-  "answer_prompt": SystemMessage(
-      "You are a synthesis engine. Given the provided data chunks, produce a concise, factual answer to the question. Think step by step and explain your reasoning argumenting wich exacly parts from data you used to explain the answer. Try to formulate the answer in point by point format given arguments."
-  ),
-  "compare_prompt": SystemMessage(
-      "You are an impartial comparator. You are provided with a question and two answers to the question. Despite the answers might be different in essence - review them like both are absolutely true. You need to decide witch of them is better in terms of details. What answer has more details, facts and more understandable. Return number -1 if first answer is better, 1 if second answer is better, 0 if they are equal. In case of -1, also return what details are in the first questions thet are missing in the second answer. In case of 1, also return what details are in the second questions thet are missing in the first answer. In case of 0, return that answers are equal. Always think step by step. \n"
-      "explain what's missing from the actual answer compared to the synthetic ideal, and return a numeric value -1/0/1."
-  ),
-  "subquery_prompt": SystemMessage(
-      "You are a subquestion generator. You are provided with original question and questoins tha already was asked. But seems to be that topic is still not covered enough by previous answers. You need to generate the new question that would help to understand more the original questoin of the user. Don't repeat already asked question by essence. Be generating new answers you need to do it by following technic: Take the first users's question or any already asked question and generate one by decompose by essence the previous one. WIth thius decomposing create more specific question about more specific topic that lofically should be the part of user's abstract question.\n"
-
-  ),
-  "compression_prompt": SystemMessage(
-      "You are a compressor. You are provided with user's question, data end size this data should be trimmed to. You need to make shorter version of the data not bigger that provided size. Priority of summarizing the content: 1 - Filter out information from the data that is not relevant to the question. Keep relevant information only. 2 - If data size is stll bigger then treshold - summarise the  existed data to make it fit in the treshold"
-  ),
-
-  "synthetic_answer_prompt": SystemMessage(
-      "Produce an ideal short answer for the question. Answer should not be true, facts and all answer details should be invented. The goal is to produce an answer that would be perfect if it was true. This ideal answer will be used to compare with the actual answer produced from retrieved data, to see what details are missing in the actual answer. So make sure to include many specific details, facts, and a comprehensive explanation in this ideal answer. Criteria to build ideal answer: 1 - make it very detailed, 2 - include many facts related to question, 3 - make it comprehensive and easy to understand. Always think step by step and answer in logical structure. Answer should be no more then six sentences"
-  ),
-
+  "answer_prompt": SystemMessage(prompt_manager.get_prompt("rephrase_retrieval_uc_answer")),
+  "compare_prompt": SystemMessage(prompt_manager.get_prompt('rephrase_retrieval_uc_answer_comparator')),
+  "subquery_prompt": SystemMessage(prompt_manager.get_prompt('rephrase_retrieval_uc_rephrase_question')),
+  "compression_prompt": SystemMessage(prompt_manager.get_prompt("rephrase_retrieval_uc_compression")),
+  "synthetic_answer_prompt": SystemMessage(prompt_manager.get_prompt("rephrase_retrieval_uc_synthetic_answer")),
   "final_answer": None
 }
 
@@ -313,24 +300,11 @@ def run_subquery_search_in_report_full_state(ticker: str, question: str) -> dict
     "context_threshold": 4000,
     "compression_coef": 0.7,
 
-    "answer_prompt": SystemMessage(
-        "You are a synthesis engine. Given the provided data chunks, produce a concise, factual answer to the question. Think step by step and explain your reasoning argumenting wich exacly parts from data you used to explain the answer. Try to formulate the answer in point by point format given arguments."
-    ),
-    "compare_prompt": SystemMessage(
-        "You are an impartial comparator. You are provided with a question and two answers to the question. Despite the answers might be different in essence - review them like both are absolutely true. You need to decide witch of them is better in terms of details. What answer has more details, facts and more understandable. Return number -1 if first answer is better, 1 if second answer is better, 0 if they are equal. In case of -1, also return what details are in the first questions thet are missing in the second answer. In case of 1, also return what details are in the second questions thet are missing in the first answer. In case of 0, return that answers are equal. Always think step by step. \n"
-        "explain what's missing from the actual answer compared to the synthetic ideal, and return a numeric value -1/0/1."
-    ),
-    "subquery_prompt": SystemMessage(
-        "You are a subquestion generator. You are provided with original question and questoins tha already was asked. But seems to be that topic is still not covered enough by previous answers. You need to generate the new question that would help to understand more the original questoin of the user. Don't repeat already asked question by essence. Be generating new answers you need to do it by following technic: Take the first users's question or any already asked question and generate one by decompose by essence the previous one. WIth thius decomposing create more specific question about more specific topic that lofically should be the part of user's abstract question.\n"
-
-    ),
-    "compression_prompt": SystemMessage(
-        "You are a compressor. You are provided with user's question, data end size this data should be trimmed to. You need to make shorter version of the data not bigger that provided size. Priority of summarizing the content: 1 - Filter out information from the data that is not relevant to the question. Keep relevant information only. 2 - If data size is stll bigger then treshold - summarise the  existed data to make it fit in the treshold"
-    ),
-
-    "synthetic_answer_prompt": SystemMessage(
-        "Produce an ideal short answer for the question. Answer should not be true, facts and all answer details should be invented. The goal is to produce an answer that would be perfect if it was true. This ideal answer will be used to compare with the actual answer produced from retrieved data, to see what details are missing in the actual answer. So make sure to include many specific details, facts, and a comprehensive explanation in this ideal answer. Criteria to build ideal answer: 1 - make it very detailed, 2 - include many facts related to question, 3 - make it comprehensive and easy to understand. Always think step by step and answer in logical structure. Answer should be no more then six sentences"
-    ),
+    "answer_prompt": SystemMessage(prompt_manager.get_prompt("rephrase_retrieval_uc_answer")),
+    "compare_prompt": SystemMessage(prompt_manager.get_prompt('rephrase_retrieval_uc_answer_comparator')),
+    "subquery_prompt": SystemMessage(prompt_manager.get_prompt('rephrase_retrieval_uc_rephrase_question')),
+    "compression_prompt": SystemMessage(prompt_manager.get_prompt("rephrase_retrieval_uc_compression")),
+    "synthetic_answer_prompt": SystemMessage(prompt_manager.get_prompt("rephrase_retrieval_uc_synthetic_answer")),
 
     "final_answer": None
   }
@@ -342,6 +316,11 @@ def run_subquery_search_in_report_full_state(ticker: str, question: str) -> dict
 
 
 if __name__ == "__main__":
+
+  import os
+  for k in ["LANGSMITH_TRACING", "LANGSMITH_ENDPOINT", "LANGSMITH_API_KEY", "LANGSMITH_PROJECT"]:
+    print(k, "=", os.getenv(k))
+
   # with open("/Users/ibahr/Downloads/synthetic_report.pdf", "rb") as f:
   with open("/Users/ibahr/Desktop/reports/UBER.html", "rb") as f:
     pdf_content = f.read()
@@ -366,30 +345,17 @@ if __name__ == "__main__":
     "questions": [],
     "all_data": [],
 
-    "max_iterations": 3,
+    "max_iterations": 1,
     "min_iterations": 0,
 
     "context_threshold": 2000,
     "compression_coef": 0.7,
 
-    "answer_prompt": SystemMessage(
-      "You are a synthesis engine. Given the provided data chunks, produce a concise, factual answer to the question. Think step by step and explain your reasoning argumenting wich exacly parts from data you used to explain the answer. Try to formulate the answer in point by point format given arguments."
-    ),
-    "compare_prompt": SystemMessage(
-      "You are an impartial comparator. You are provided with a question and two answers to the question. Despite the answers might be different in essence - review them like both are absolutely true. You need to decide witch of them is better in terms of details. What answer has more details, facts and more understandable. Return number -1 if first answer is better, 1 if second answer is better, 0 if they are equal. In case of -1, also return what details are in the first questions thet are missing in the second answer. In case of 1, also return what details are in the second questions thet are missing in the first answer. In case of 0, return that answers are equal. Always think step by step. \n"
-      "explain what's missing from the actual answer compared to the synthetic ideal, and return a numeric value -1/0/1."
-    ),
-    "subquery_prompt": SystemMessage(
-      "You are a subquestion generator. You are provided with original question and questoins tha already was asked. But seems to be that topic is still not covered enough by previous answers. You need to generate the new question that would help to understand more the original questoin of the user. Don't repeat already asked question by essence. Be generating new answers you need to do it by following technic: Take the first users's question or any already asked question and generate one by decompose by essence the previous one. WIth thius decomposing create more specific question about more specific topic that lofically should be the part of user's abstract question.\n"
-
-    ),
-    "compression_prompt": SystemMessage(
-      "You are a compressor. You are provided with user's question, data end size this data should be trimmed to. You need to make shorter version of the data not bigger that provided size. Priority of summarizing the content: 1 - Filter out information from the data that is not relevant to the question. Keep relevant information only. 2 - If data size is stll bigger then treshold - summarise the  existed data to make it fit in the treshold"
-    ),
-
-    "synthetic_answer_prompt": SystemMessage(
-      "Produce an ideal short answer for the question. Answer should not be true, facts and all answer details should be invented. The goal is to produce an answer that would be perfect if it was true. This ideal answer will be used to compare with the actual answer produced from retrieved data, to see what details are missing in the actual answer. So make sure to include many specific details, facts, and a comprehensive explanation in this ideal answer. Criteria to build ideal answer: 1 - make it very detailed, 2 - include many facts related to question, 3 - make it comprehensive and easy to understand. Always think step by step and answer in logical structure. Answer should be no more then six sentences"
-    ),
+    "answer_prompt": SystemMessage(prompt_manager.get_prompt("rephrase_retrieval_uc_answer")),
+    "compare_prompt": SystemMessage(prompt_manager.get_prompt('rephrase_retrieval_uc_answer_comparator')),
+    "subquery_prompt": SystemMessage(prompt_manager.get_prompt('rephrase_retrieval_uc_rephrase_question')),
+    "compression_prompt": SystemMessage(prompt_manager.get_prompt("rephrase_retrieval_uc_compression")),
+    "synthetic_answer_prompt": SystemMessage(prompt_manager.get_prompt("rephrase_retrieval_uc_synthetic_answer")),
 
     "final_answer": None
   }

@@ -1,9 +1,6 @@
 from abc import ABC, abstractmethod
 import json
 import requests
-import finnhub
-from datetime import datetime, timedelta
-from newspaper import Article
 import time
 
 from src.util.env_property import get_env_property

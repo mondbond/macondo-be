@@ -9,6 +9,7 @@ from src.service.graph.news_search_reflection_summary_graph import \
 from src.service.graph.report_search_reflection_graph import runt_report_search
 from src.service.graph.core.subquery_retrieval_graph1 import \
   run_subquery_search_in_report
+from src.service.graph.router_graph import route_app, RouterState
 
 
 def route_user_intention(query: str) -> RouterDto:
@@ -80,6 +81,15 @@ def start_graph_v1(query: str):
     return run_subquery_search_in_report(user_intention.ticker[0], query)
 
   return "Can not identify the query intention"
+
+
+async def start_graph_v2(query: str):
+  state = RouterState(
+      user_message = query,
+  )
+  result = await route_app.ainvoke(state)
+
+  return result['bot_message']
 
 if __name__ == "__main__":
   query = "ticker is AAPL,UBER,TSLA. Explain the latest share price changes from the news"

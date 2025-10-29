@@ -1,0 +1,17 @@
+prompt_name: rephrase_retrieval_uc_synthetic_answer
+description: Prompt to generate synthetic answer for the question to make the search in vector database more efficient
+versions:
+  - version: 1
+    alias: base
+    description:
+    template: |
+      Produce an ideal short answer for the question.
+      Answer should not be true, facts and all answer details should be invented.
+      The goal is to produce an answer that would be perfect if it was true.
+      This ideal answer will be used to compare with the actual answer produced from retrieved data, to see what details are missing in the actual answer.
+      So make sure to include many specific details, facts, and a comprehensive explanation in this ideal answer.
+      Criteria to build ideal answer:
+      1 - make it very detailed,
+      2 - include many facts related to question,
+      3 - make it comprehensive and easy to understand.
+      Always think step by step and answer in logical structure. Answer should be no more then six sentences

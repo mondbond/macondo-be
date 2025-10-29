@@ -20,3 +20,13 @@ services:
       - macondo-be
     environment:
       - ACTIVE_ENV=local-compose
+
+  mond_mcp:
+    build: ../../mond_mcp
+    image: mond_mcp:latest
+    container_name: mond_mcp
+    ports:
+      - "8887:8887"
+    environment:
+      - FINNHUB_API_KEY=d03oatpr01qh439i65lgd03oatpr01qh439i65m0
+      - TWELVE_DATA_API_KEY=3fc9c6b40e694c6ba2cd56340cae19e1

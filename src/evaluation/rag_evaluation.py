@@ -15,6 +15,9 @@ from src.service.graph.core.subquery_retrieval_graph1 import \
 from src.service.query_report_service import base_query_report_question_answer_full_state
 from src.usecase.report_uc import save_text_report
 
+
+# todo: add dynamic prompt creator with provided info
+
 # Setup data
 with open("/Users/ibahr/Desktop/reports/AAPL.html", "rb") as f:
   pdf_content = f.read()

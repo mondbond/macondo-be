@@ -4,7 +4,6 @@ import re
 
 from bs4 import BeautifulSoup
 
-#todo resolve format/check errors
 def any_format_to_str(file, content_type):
   if content_type == "text/html":
     return soup_html_to_text(file)

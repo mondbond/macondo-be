@@ -11,7 +11,7 @@ from torch.sparse import addmm
 from typing_extensions import TypedDict, Literal
 
 from src.llm import llm_provider
-from src.llm.llm_provider import llm
+from src.llm.llm_provider import get_llm
 from src.usecase.report_uc import save_report
 
 ACT_NODE = "ACT"

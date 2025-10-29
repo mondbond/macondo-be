@@ -29,7 +29,7 @@ class CustomAgentExecutor():
           # }
           # |
           prompt
-          | self.llm.bind_tools(self.all_tools, tool_choice="any"))
+          | self.llm.bind_tools(self.all_tools, tool_choice="auto"))
 
       self.tools = tools
       self.max_iteration = max_iteration
@@ -46,7 +46,7 @@ class CustomAgentExecutor():
 
             print("SCRATCHPAD:")
             print(agent_scratchpad)
-            response = self.runnable.invoke({"input": input["input"], "agent_scratchpad": agent_scratchpad})
+            response = self.runnable.invoke({"input": input["input"], "history" : input['history'], "agent_scratchpad": agent_scratchpad})
             print("Response:" + str(response))
 
             self.history.append(response)
@@ -86,7 +86,7 @@ class CustomAgentExecutor():
 
             if tool_name == self.end_tool.name:
               print("Final tool called, stopping iterations.")
-              answer = tool_args['final_answer']
+              answer = str(tool_args)
               break
 
             # Check if the response indicates that we should stop

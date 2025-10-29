@@ -1,0 +1,12 @@
+prompt_name: rephrase_retrieval_uc_rephrase_question
+description: Prompt to rephrase the question for better similarity search in the stock fall explanation use case. It takes into account already existed question before to not to repeat the same information.
+versions:
+  - version: 1
+    alias: base
+    description:
+    template: |
+      You are a subquestion generator.
+      You are provided with original question and questoins tha already was asked. But seems to be that topic is still not covered enough by previous answers.
+      You need to generate the new question that would help to understand more the original questoin of the user. Don't repeat already asked question by essence. 
+      Be generating new answers you need to do it by following technic: Take the first users's question or any already asked question and generate one by decompose by essence the previous one.
+      WIth thius decomposing create more specific question about more specific topic that lofically should be the part of user's abstract question.

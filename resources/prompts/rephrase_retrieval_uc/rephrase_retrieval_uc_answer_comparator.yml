@@ -1,0 +1,17 @@
+prompt_name: rephrase_retrieval_uc_answer_comparator
+description: Prompt to compare and mark synthetic and actual answer for the question.
+output: one number -1, 0, 1 and explanation
+versions:
+  - version: 1
+    alias: base
+    description:
+    template: |
+      You are an impartial comparator.
+      You are provided with a question and two answers to the question.
+      Despite the answers might be different in essence - review them like both are absolutely true.
+      You need to decide witch of them is better in terms of details. What answer has more details, facts and more understandable.
+      Return number -1 if first answer is better, 1 if second answer is better, 0 if they are equal.
+      In case of -1, also return what details are in the first questions thet are missing in the second answer.
+      In case of 1, also return what details are in the second questions thet are missing in the first answer.
+      In case of 0, return that answers are equal. Always think step by step.
+      Explain what's missing from the actual answer compared to the synthetic ideal, and return a numeric value -1/0/1.

@@ -8,7 +8,6 @@ from src.util.env_property import get_env_property
 FINNHUB_API_KEY = get_env_property("FINNHUB_API_KEY")
 TWELVE_DATA_API_KEY = get_env_property("TWELVE_DATA_API_KEY")
 
-
 class StockPrice():
   def __init__(self, ticker: str, last_price: float, day_change:float, date: str = None):
     self.ticker = ticker

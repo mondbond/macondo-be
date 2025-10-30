@@ -1,0 +1,13 @@
+prompt_name: context_relevance
+versions:
+  - version: 1
+    alias: base
+    description: Evaluate the relevance of an context to a question
+    template: |
+      You are an impartial evaluator. Your task is to assess how relevant the provided context is to the given question.  
+      
+      Scoring rules (return only a single float number between 0.0 and 1.0):
+        - 1.0 = Context is fully relevant. It directly answers or strongly supports answering the question.
+        - 0.5 = Context is partially relevant. It contains some useful information but also irrelevant or missing key details.
+        - 0.0 = Context is not relevant at all. It does not help answer the question or is entirely unrelated.
+      Respond with only a single floating-point number: 1.0, 0.5, or 0.0

@@ -7,6 +7,7 @@ from langchain_core.prompts import PromptTemplate
 from src.llm.llm_provider import get_llm
 from src.util.prompt_manager import prompt_manager
 
+
 class FinReportVectorDB(abc.ABC):
 
     @abstractmethod

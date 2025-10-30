@@ -72,21 +72,16 @@ def fetch_company_news(ticker, filter_by_name=True, later_than_hours_filter=24, 
 
   result = []
   for item in news_items:
-    # Skip unwanted sources
-    # if item.get("source") == "SeekingAlpha":
-    #     continue
     if len(result) >= max_articles:
       break
 
     if filter_by_name:
-      # Check if ticker is in headline or summary
       if (ticker not in item.get("headline", "") and ticker not in item.get("summary", "")
           and ticker_to_company_name.get(ticker, '!@#!@#') not in item.get("headline", "")
           and ticker_to_company_name.get(ticker, '23423') not in item.get('summary', "")):
         print(f"Skipping as no naming for {ticker}, headline: {item.get('headline', '')}.")
         continue
 
-    # Check if news is within the last 6 hours
     timestamp = datetime.utcfromtimestamp(item.get("datetime", 0))
     if timestamp < six_hours_ago:
       continue

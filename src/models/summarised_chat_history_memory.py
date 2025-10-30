@@ -4,16 +4,14 @@ from langgraph.store.memory import InMemoryStore
 from src.llm.llm_provider import get_llm
 from src.util.prompt_manager import prompt_manager
 
-
-# Define Memory Node
 class SummaryChatHistory():
-  def __init__(self, llm, summarizr_prompt, summary_trim_coeficient = 0.5, window_character_size=2000):
+  def __init__(self, llm, summarize_prompt, summary_trim_coeficient = 0.5, window_character_size=2000):
     super().__init__()
     self.memory = InMemoryStore()
     self.window_size = window_character_size
     self.coeficient = summary_trim_coeficient
     self.llm = llm
-    self.summarizer_prompt = summarizr_prompt
+    self.summarizer_prompt = summarize_prompt
 
   def add_message(self, user_id, role, message):
     namespace = (user_id, "history")
@@ -64,35 +62,6 @@ class SummaryChatHistory():
         history = []
 
     return history
-
-  # def process(self, new_message=None, session_id="default"):
-  #   history = self.memory.get(session_id).get()
-  #
-  #
-  #
-  #   if new_message:
-  #     history.append(new_message)
-  #
-  #   # Apply sliding window & summarization
-  #   if len(history) > self.window_size:
-  #     if self.summarizer:
-  #       summary = self.summarizer.process(history[:2])
-  #       history = [summary] + history[2:]
-  #     else:
-  #       history = history[-self.window_size:]
-  #
-  #   self.memory.set("history", history)
-  #   return history
-
-# Graph setup
-# graph = Graph()
-# memory_node = MemoryNode(window_size=5, summarizer=my_summarizer_node)
-# llm_node = MyLLMNode()
-
-# # Connect nodes
-# graph.add_edge(memory_node, llm_node)  # memory feeds LLM
-# graph.add_edge(llm_node, memory_node)  # LLM output updates memory
-
 
 summary_memory = SummaryChatHistory(get_llm(), prompt_manager.get_prompt('trim_chat_history'), window_character_size=200)
 

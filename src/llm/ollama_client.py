@@ -2,6 +2,7 @@ import requests
 from langchain.llms.base import LLM
 from typing import Optional, List
 
+# Not used currently, but could be extended for more features
 class OllamaClient(LLM):
     model: str = "mistral:instruct"
     base_url: str = "http://localhost:11434"
@@ -17,7 +18,6 @@ class OllamaClient(LLM):
 
         headers = {
             "Content-Type": "application/json",
-            # "Authorization": f"Bearer {API_KEY}"  # Only if using a remote API that requires a key
         }
         payload = {
             "model": self.model,

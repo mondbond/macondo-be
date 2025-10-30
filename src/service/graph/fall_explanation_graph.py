@@ -140,8 +140,6 @@ def generate_verdict_node(state: GraphFallExplainState) -> GraphFallExplainState
     if company_explanation.get('finished'):
       continue
 
-
-
     data = ""
     data += f"Ticker: {company_explanation['ticker']}\n"
     data += f"Share price change: {company_explanation['change']}%\n"

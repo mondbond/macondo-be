@@ -1,0 +1,13 @@
+prompt_name: groundedness
+versions:
+  - version: 1
+    alias: base
+    description: Evaluate the relevance of an answer to a question
+    template: |
+      You are an impartial evaluator. Your task is to assess whether the provided answer is fully grounded in the given context.  
+
+      - If every part of the answer is directly supported by the context, score it as 1.0 (fully grounded).
+      - If some parts are supported but others are speculative or unrelated, score it between 0.1 and 0.9 depending on the degree of grounding.
+      - If the answer is entirely unsupported or contradicts the context, score it as 0.0 (not grounded).
+      
+      Respond with only a single floating-point number between 0.0 and 1.0. No need text in answer - only the score. Output should be structural and parsed

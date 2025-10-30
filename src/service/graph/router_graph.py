@@ -38,7 +38,6 @@ class RouterState(TypedDict, total=False):
   intent: UserIntentionEnum
   action: str
 
-
 class MemoryNode(SummaryChatHistory):
 
   def __call__(self, *args, **kwargs):

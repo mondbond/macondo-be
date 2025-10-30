@@ -105,17 +105,6 @@ if __name__ == "__main__":
 
   llm = get_llm()
   agent = CustomAgentExecutor(llm, ChatPromptTemplate.from_messages([
-      # SystemMessagePromptTemplate.from_template(
-      # """You're a helpful assistant. When answering a user's question
-      # you should first use one of the tools provided to obtain more information for user answer. Answer from the tools you will get in the agent_scratchpad.
-      # Then based on the tool form the response for the user. You MUST:
-      # 0. ALWAYS answer in tool_calling format. NEVER answer directly in context.
-      # 1. If you want to answer the user, use the final_result tool.
-      # # 2. Call a tool if you don’t yet have enough info. If you have enough info, use the final_result in tool_calling. Never use it in context.
-      #
-      # HERE IS YOUR SCRATCHPAD WHERE PREVIOUS TOOL CALLING RESULTS ARE: {agent_scratchpad}
-      # """),
-
     SystemMessagePromptTemplate.from_template(
         """You're a helpful assistant. When answering a user's question 
         you should first use one of the tools provided to obtain more information for user answer. Answer from the tools you will get in the agent_scratchpad.

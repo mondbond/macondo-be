@@ -9,7 +9,6 @@ def save_report(file, metadata, content_type):
 
   db_client.add_new_report(chunks, metadata)
 
-# todo reuse
 def save_text_report(text, metadata):
   chunks = text_to_semantic_splitting(text)
   print(f"Total chunks created: {len(chunks)}")

@@ -1,6 +1,7 @@
-from src.llm.ollama_client import OllamaClient
 from src.util.env_property import get_env_property
 from langchain_ollama import ChatOllama
+import boto3
+from langchain_aws import ChatBedrockConverse
 
 # llm = OllamaClient(base_url="http://localhost:11434", model="mistral:instruct")
 # llm = OllamaClient(base_url="http://host.docker.internal:11434", model="mistral:instruct")
@@ -8,13 +9,10 @@ from langchain_ollama import ChatOllama
 # llmOldClient = OllamaClient(base_url=get_env_property("LLM_URL"), model="mistral:instruct")
   # llm = ChatOllama(base_url=get_env_property("LLM_URL"), model="mistral:instruct", verbose=True, temperature=0)
 
-
 def local_ollama_client(temperature=0):
   return ChatOllama(base_url=get_env_property("LLM_URL"), model="mistral:instruct", verbose=True, temperature=temperature)
 
 def bedrock_client(temperature=0):
-  import boto3
-  from langchain_aws import ChatBedrockConverse
 
   bedrock_id = get_env_property("BEDROCK_MODEL", None)
 
@@ -39,15 +37,14 @@ def bedrock_client(temperature=0):
   )
 
 
-def get_llm(temperature=0):
-    llm_source = get_env_property("LLM_SOURCE", "ollama")
+def get_llm(temperature=0, specific_source: str = "LLM_SOURCE"):
+    llm_source = get_env_property(specific_source, "ollama")
 
     if llm_source == "ollama":
+        print("llm_provider: using ollama client")
         return local_ollama_client(temperature)
     elif llm_source == "bedrock":
-        return bedrock_client(temperature)
+      print("llm_provider: using bedrock client")
+      return bedrock_client(temperature)
 
-    # todo: make model configurable
     return local_ollama_client()
-    # return  bedrock_client()
-

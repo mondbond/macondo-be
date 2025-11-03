@@ -4,50 +4,52 @@ from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph import StateGraph
 from pydantic import BaseModel, Field
 
+from src.service.thirdparty.news.finhub_news_service import fetch_company_news
 from src.tools.tools import search_company_news
 from typing_extensions import TypedDict, Literal
+from src.util.logger import logger
 
 from src.llm import llm_provider
-
-mock = [
-  {
-    "headline": "Oracle soars, TSMC & Broadcom emerge winners: Market Wrap",
-    "id": "0ORCL",
-    "relevance_score": 0,
-    "summary": "Here are the stocks that made the most significant market moves today.",
-    "text": "Oracle soars, TSMC & Broadcom emerge winners: Market Wrap. Here are the stocks that made the most significant market moves today.",
-    "url": "https://finnhub.io/api/news?id=97425574bd9da7160317e08e37f7d18ca6a377828eaa3ba3f424e2dd1c2f5b77",
-  },
-  {
-    "headline": "Who is Larry Ellison, the new richest person in the world?",
-    "id": "1ORCL",
-    "relevance_score": 0,
-    "summary": "Oracle co-founder Larry Ellison is now the world's richest person, according to Bloomberg's latest ranking.",
-    "text": "Who is Larry Ellison, the new richest man in the world?\n\nOracle co-founder Larry Ellison is now the world's richest person, according to Bloomberg's latest ranking.",
-    "url": "https://finnhub.io/api/news?id=b3b16844c485f9d80305ea56078597d8316523004dd7e42bc3035430834156a9",
-  },
-  {
-    "headline": "Dow Jones Futures: Nvidia, GE Vernova Lead New Buys As Oracle Drives AI Stocks",
-    "id": "2ORCL",
-    "summary": "Oracle fueled AI stocks Wednesday, with Nvidia and GE Vernova leading new buys. But the stock market had a lackluster day.",
-    "text": "There are no important events for this country at this time. Select \"All\" to see top events in other countries or view all events.",
-    "url": "https://finnhub.io/api/news?id=fdc09589b2716b3b9c5611dc94b44834c44809b6b8acb7d0d5903854623d410a",
-  },
-  {
-    "headline": "Jobs Data Mess & AI's Moment: Unpacking the Week's Biggest News",
-    "id": "3ORCL",
-    "summary": "Following a significant jobs revision that signals an weaker economy than previously thought, the AI industry's growth has become even more impressive. Recent news from Nebius and Oracle debunks key criticisms of the AI boom.",
-    "text": "BLS Data Debacle\n\nEven though the market is just now making its way out of the ‘Summer doldrums and many institutional investors are returning from summer vacations, Wall Street is off to an eventful week...",
-    "url": "https://finnhub.io/api/news?id=d3527b91e3f42727bc6d8c75318e621bd392ea008ef80930c6d5c34daf391984",
-  },
-  {
-    "headline": "S&P, Nasdaq notch record-high closes as Oracle soars on AI optimism",
-    "id": "4ORCL",
-    "summary": "STORY: U.S. stocks ended mixed on Wednesday, as the Dow dropped almost half a percent, the S&P 500 gained three tenths of a percent to notch its second straight closing high, and the Nasdaq ticked up just enough to record its third consecutive record high close.",
-    "text": "STORY: U.S. stocks ended mixed on Wednesday, as the Dow dropped almost half a percent, the S&P 500 gained three tenths of a percent to notch its second straight closing high...",
-    "url": "https://finnhub.io/api/news?id=71f34f2b3f1221903b3e3580efa5a3b84c96ed5f164a7aac7740e7159ac2c04e",
-  },
-]
+#
+# mock = [
+#   {
+#     "headline": "Oracle soars, TSMC & Broadcom emerge winners: Market Wrap",
+#     "id": "0ORCL",
+#     "relevance_score": 0,
+#     "summary": "Here are the stocks that made the most significant market moves today.",
+#     "text": "Oracle soars, TSMC & Broadcom emerge winners: Market Wrap. Here are the stocks that made the most significant market moves today.",
+#     "url": "https://finnhub.io/api/news?id=97425574bd9da7160317e08e37f7d18ca6a377828eaa3ba3f424e2dd1c2f5b77",
+#   },
+#   {
+#     "headline": "Who is Larry Ellison, the new richest person in the world?",
+#     "id": "1ORCL",
+#     "relevance_score": 0,
+#     "summary": "Oracle co-founder Larry Ellison is now the world's richest person, according to Bloomberg's latest ranking.",
+#     "text": "Who is Larry Ellison, the new richest man in the world?\n\nOracle co-founder Larry Ellison is now the world's richest person, according to Bloomberg's latest ranking.",
+#     "url": "https://finnhub.io/api/news?id=b3b16844c485f9d80305ea56078597d8316523004dd7e42bc3035430834156a9",
+#   },
+#   {
+#     "headline": "Dow Jones Futures: Nvidia, GE Vernova Lead New Buys As Oracle Drives AI Stocks",
+#     "id": "2ORCL",
+#     "summary": "Oracle fueled AI stocks Wednesday, with Nvidia and GE Vernova leading new buys. But the stock market had a lackluster day.",
+#     "text": "There are no important events for this country at this time. Select \"All\" to see top events in other countries or view all events.",
+#     "url": "https://finnhub.io/api/news?id=fdc09589b2716b3b9c5611dc94b44834c44809b6b8acb7d0d5903854623d410a",
+#   },
+#   {
+#     "headline": "Jobs Data Mess & AI's Moment: Unpacking the Week's Biggest News",
+#     "id": "3ORCL",
+#     "summary": "Following a significant jobs revision that signals an weaker economy than previously thought, the AI industry's growth has become even more impressive. Recent news from Nebius and Oracle debunks key criticisms of the AI boom.",
+#     "text": "BLS Data Debacle\n\nEven though the market is just now making its way out of the ‘Summer doldrums and many institutional investors are returning from summer vacations, Wall Street is off to an eventful week...",
+#     "url": "https://finnhub.io/api/news?id=d3527b91e3f42727bc6d8c75318e621bd392ea008ef80930c6d5c34daf391984",
+#   },
+#   {
+#     "headline": "S&P, Nasdaq notch record-high closes as Oracle soars on AI optimism",
+#     "id": "4ORCL",
+#     "summary": "STORY: U.S. stocks ended mixed on Wednesday, as the Dow dropped almost half a percent, the S&P 500 gained three tenths of a percent to notch its second straight closing high, and the Nasdaq ticked up just enough to record its third consecutive record high close.",
+#     "text": "STORY: U.S. stocks ended mixed on Wednesday, as the Dow dropped almost half a percent, the S&P 500 gained three tenths of a percent to notch its second straight closing high...",
+#     "url": "https://finnhub.io/api/news?id=71f34f2b3f1221903b3e3580efa5a3b84c96ed5f164a7aac7740e7159ac2c04e",
+#   },
+# ]
 
 
 ACT_NODE = "ACT"
@@ -73,8 +75,8 @@ class NewsGraphReflectionState(TypedDict):
 
 
 def act_node(state: NewsGraphReflectionState) -> NewsGraphReflectionState:
-  print(f"ACT NODE - Step {state['counter'] + 1}")
-  news_list = mock
+  logger.info(f"ACT NODE - Step {state['counter'] + 1}")
+  news_list = fetch_company_news(state['ticker'])
 
   state['counter'] += 1
   state['relevant_news'].extend(news_list)
@@ -82,7 +84,7 @@ def act_node(state: NewsGraphReflectionState) -> NewsGraphReflectionState:
 
 
 def reflect_node(state: NewsGraphReflectionState) -> NewsGraphReflectionState:
-  print(f"REFLECT NODE - Step {state['counter'] + 1}")
+  logger.info(f"REFLECT NODE - Step {state['counter'] + 1}")
 
   """Condition to reflect and decide next action."""
 
@@ -111,11 +113,11 @@ def reflect_node(state: NewsGraphReflectionState) -> NewsGraphReflectionState:
 
 
 def summary_node(state: NewsGraphReflectionState) -> NewsGraphReflectionState:
-  print(f"SUMMARY NODE - Step {state['counter'] + 1}")
+  logger.info(f"SUMMARY NODE - Step {state['counter'] + 1}")
 
   """Condition to summarize the findings."""
   for news in state['relevant_news']:
-    print(f"News: {news['headline']} \\n Relevance Score: {news.get('relevance_score', 'NO relevance score')}")
+    logger.info(f"News: {news['headline']} \\n Relevance Score: {news.get('relevance_score', 'NO relevance score')}")
 
   relevant_news = [news for news in state['relevant_news'] if int(news.get('relevance_score', '0')) >= 5]
 
@@ -139,9 +141,6 @@ def summary_node(state: NewsGraphReflectionState) -> NewsGraphReflectionState:
   state['end_reason'] = f"Summary of relevant news articles provided"
 
   return state
-
-
-
 
 def form_response_node(state: NewsGraphReflectionState) -> NewsGraphReflectionState:
   """Condition to end the graph process."""
@@ -186,7 +185,7 @@ def run_news_graph(ticker, query) -> NewsGraphReflectionState:
   )
 
   final_state = app.invoke(initial_state)
-  print(final_state)
+  logger.info(final_state)
   return final_state['answer']
 
 if __name__ == "__main__":
@@ -203,4 +202,4 @@ if __name__ == "__main__":
   )
 
   final_state = app.invoke(initial_state)
-  print("Final State:", final_state)
+  logger.info("Final State:", final_state)

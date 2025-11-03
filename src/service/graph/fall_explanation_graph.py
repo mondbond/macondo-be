@@ -13,6 +13,7 @@ import os
 from src.llm import llm_provider
 from src.usecase.report_uc import save_text_report
 from src.util.prompt_manager import prompt_manager
+from src.util.logger import logger
 
 REASON_PROMPT = prompt_manager.get_prompt('stock_fall_explanation_uc_logic')
 
@@ -70,7 +71,6 @@ GENERATE_VERDICT_NODE = "GENERATE_VERDICT"
 GENERATE_MSG_NODE = "GENERATE_MSG"
 
 
-
 class FallenCompanyVerdict(BaseModel):
   """Structured output model for the verdict on a fallen company's stock price. Include 3 sentences summary and final verdict."""
   summary_text: str  = Field(description="Using provided information, give a concise summary verdict around 7 sentences explaining why you are thinking so. And main answer - if this fall is temporary or long term. Think step by step explaining why exactly you think so based on provided information. If you don't have enough information to make a decision, say that you don't have enough information.")
@@ -80,7 +80,6 @@ class NegativeFiveToFiveMark(BaseModel):
   """Schema for making marks in range from -5 to 5 and explaining your reasoning."""
   reasoning: str = Field(description="Provide a brief explanation for your rating thinking step by step explaining your thoughts why you giving this mark.")
   mark : int = Field(description="Provide a score from -5 to 5 based on provided data to mark if I should buy the stock share or not where -5 means I absolutely should not to do it and 0 is full neutral mark and 5 - absolutely should buy.")
-
 
 
 class CompanyFallExplanation(TypedDict):
@@ -116,7 +115,7 @@ def collect_fall_change_tickers(state: GraphFallExplainState) -> GraphFallExplai
     news = fetch_company_news(fall_company['ticker'])
     # news = news_mock
     fall_company['news'] = news
-  print("Tickers with significant fall:", state['company_fall_explanation'])
+  logger.info("Tickers with significant fall:", state['company_fall_explanation'])
 
   for fall_company in state['company_fall_explanation']:
     if not fall_company.get('news') or len(fall_company['news']) == 0:
@@ -134,7 +133,7 @@ def collect_fall_change_tickers(state: GraphFallExplainState) -> GraphFallExplai
 
 
 def generate_verdict_node(state: GraphFallExplainState) -> GraphFallExplainState:
-  print("VERDICT NODE")
+  logger.info("VERDICT NODE")
 
   for idx, company_explanation in enumerate(state['company_fall_explanation']):
     if company_explanation.get('finished'):
@@ -191,7 +190,7 @@ def generate_verdict_node(state: GraphFallExplainState) -> GraphFallExplainState
 
 
 def form_response_node(state: GraphFallExplainState) -> GraphFallExplainState:
-  print("FORM RESPONSE NODE")
+  logger.info("FORM RESPONSE NODE")
 
   answer = ""
   for idx, company_explanation in enumerate(state['company_fall_explanation']):
@@ -242,60 +241,62 @@ def run_company_fall_explanation_graph(tickers: list[str]) -> GraphFallExplainSt
   )
 
   final_state = app.invoke(initial_state)
-  print("Final State:", final_state)
+  logger.info("Final State:", final_state)
   return final_state['answer']
 
 if __name__ == "__main__":
-  # with open("/Users/ibahr/Downloads/synthetic_report.pdf", "rb") as f:
-  # with open("/Users/ibahr/Desktop/reports/UBER.html", "rb") as f:
-  #   pdf_content = f.read()
-  #   report = soup_html_to_text(pdf_content)
-  #
+  # # with open("/Users/ibahr/Downloads/synthetic_report.pdf", "rb") as f:
+  # # with open("/Users/ibahr/Desktop/reports/UBER.html", "rb") as f:
+  # #   pdf_content = f.read()
+  # #   report = soup_html_to_text(pdf_content)
+  # #
+  # #   metadata = {
+  # #     "ticker": "UBER",
+  # #     "date": "2025-07-17"
+  # #   }
+  # #
+  # # # save_report(pdf_content, metadata)
+  # # save_text_report(report, metadata)
+  # tickers = []
+  # folder = "/Users/ibahr/Desktop/reports"
+  # for filename in os.listdir(folder):
+  #   logger.info(filename)
+  #   ticker = filename.split('.')[0]
+  #   tickers.append(ticker)
+  #   with open(folder + '/' + filename, "rb") as f:
+  #     report = f.read()
+  #   report = soup_html_to_text(report)
   #   metadata = {
-  #     "ticker": "UBER",
+  #     "ticker": ticker,
   #     "date": "2025-07-17"
   #   }
+  #   # save_report(pdf_content, metadata)
+  #   save_text_report(report, metadata)
+  #   tickers = [
+  #     # 'ORCL',
+  #     #          'SOFI',
+  #              # 'OKTA',
+  #              # 'FICO',
+  #              # 'IONQ',
+  #              # 'PGY',
+  #              # 'MU',
+  #              'AAPL',
+  #              # 'UBER',
+  #              # 'TOST',
+  #              # 'RKLB',
+  #              # 'AMZN',
+  #              # 'RGTI'
+  #              ]
   #
-  # # save_report(pdf_content, metadata)
-  # save_text_report(report, metadata)
-  tickers = []
-  folder = "/Users/ibahr/Desktop/reports"
-  for filename in os.listdir(folder):
-    print(filename)
-    ticker = filename.split('.')[0]
-    tickers.append(ticker)
-    with open(folder + '/' + filename, "rb") as f:
-      report = f.read()
-    report = soup_html_to_text(report)
-    metadata = {
-      "ticker": ticker,
-      "date": "2025-07-17"
-    }
-    # save_report(pdf_content, metadata)
-    save_text_report(report, metadata)
-    tickers = [
-      # 'ORCL',
-      #          'SOFI',
-               # 'OKTA',
-               # 'FICO',
-               # 'IONQ',
-               # 'PGY',
-               # 'MU',
-               'AAPL',
-               # 'UBER',
-               # 'TOST',
-               # 'RKLB',
-               # 'AMZN',
-               # 'RGTI'
-               ]
+  # initial_state = GraphFallExplainState(
+  #     tickers_to_check=tickers,
+  #     # tickers_to_check=['UBER'],
+  #     company_fall_explanation=[]
+  # )
+  #
+  #
+  # final_state = app.invoke(initial_state)
+  # logger.info("Final State:", final_state)
+  # logger.info(final_state['final_answer'])
+  logger.info(app.get_graph().draw_mermaid())
 
-  initial_state = GraphFallExplainState(
-      tickers_to_check=tickers,
-      # tickers_to_check=['UBER'],
-      company_fall_explanation=[]
-  )
-
-
-  final_state = app.invoke(initial_state)
-  print("Final State:", final_state)
-  print(final_state['final_answer'])

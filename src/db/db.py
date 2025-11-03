@@ -6,6 +6,7 @@ from langchain.vectorstores import Chroma
 from langchain_core.prompts import PromptTemplate
 from src.llm.llm_provider import get_llm
 from src.util.prompt_manager import prompt_manager
+from src.util.logger import logger
 
 
 class FinReportVectorDB(abc.ABC):
@@ -78,13 +79,13 @@ class InMemoryFinReportVectorDBReport(FinReportVectorDB):
       )
 
       collection = self.db._collection
-      print("Total records:", collection.count())
+      logger.info("Total records:", collection.count())
 
     def delete_report(self, ticker):
       self.db.delete(where={"ticker": ticker})
 
       collection = self.db._collection
-      print("Total records:", collection.count())
+      logger.info("Total records:", collection.count())
 
 
 class VectorDBResolver:

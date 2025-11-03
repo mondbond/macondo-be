@@ -6,6 +6,7 @@ from src.service.memory import SummaryChatMessageHistory
 
 from src.llm.llm_provider import get_llm
 from langchain.chains import create_retrieval_chain
+from src.util.logger import logger
 
 session_to_history = {}
 

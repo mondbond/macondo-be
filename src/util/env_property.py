@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from src.util.logger import logger
 
 from dotenv import load_dotenv
 

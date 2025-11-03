@@ -41,6 +41,13 @@ yfinance = "^0.2.66"
 boto3 = "^1.40.48"
 langchain-aws = "^0.2.35"
 langchain-mcp-adapters = "^0.1.11"
+docling = "^2.59.0"
+loguru = "^0.7.3"
+evaluate = "0.4.0"
+pyarrow = "20.0.0"
+bert-score = "^0.3.13"
+guardrails-ai = "^0.6.7"
+pytest = "^8.4.2"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

@@ -4,6 +4,7 @@ from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
 from langgraph.graph import MessageGraph, StateGraph
 from langgraph.types import Command
 from pydantic import BaseModel, Field
+from src.util.logger import logger
 
 
 from src.tools.tools import report_rephrase_retriever_search, search_in_report
@@ -36,7 +37,7 @@ class GraphReflectionState(TypedDict):
 
 
 def act_node(state: GraphReflectionState) -> GraphReflectionState:
-  print(f"ACT NODE - Step {state['counter'] + 1}")
+  logger.info(f"ACT NODE - Step {state['counter'] + 1}")
   name2tool = {tool.name: tool for tool in state['tools']}
 
   llm = llm_provider.get_llm()
@@ -60,7 +61,7 @@ def act_node(state: GraphReflectionState) -> GraphReflectionState:
   js = js["tool_calls"][0]
   tool_name = js["name"]
   tool_args = js["args"]
-  print(tool_args)
+  logger.info(tool_args)
 
   tool_obj = name2tool[tool_name]
   output = tool_obj.invoke(tool_args)
@@ -72,7 +73,7 @@ def act_node(state: GraphReflectionState) -> GraphReflectionState:
 
 
 def reflect_node(state: GraphReflectionState) -> Command[Literal[ACT_NODE, END_NODE]]:
-    print(f"REFLECT NODE - Step {state['counter'] + 1}")
+    logger.info(f"REFLECT NODE - Step {state['counter'] + 1}")
 
     """Condition to reflect and decide next action."""
 
@@ -108,7 +109,7 @@ def reflect_node(state: GraphReflectionState) -> Command[Literal[ACT_NODE, END_N
 
 
 def end_summary_node(state: GraphReflectionState) -> GraphReflectionState:
-  print(f"SUMMARY NODE - Step {state['counter'] + 1}")
+  logger.info(f"SUMMARY NODE - Step {state['counter'] + 1}")
 
   """Condition to summarize the findings."""
   fetched_data = state['fetched_data']
@@ -184,4 +185,4 @@ if __name__ == "__main__":
   )
 
   final_state = app.invoke(initial_state)
-  print("Final State:", final_state)
+  logger.info("Final State:", final_state)

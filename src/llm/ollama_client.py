@@ -1,6 +1,7 @@
 import requests
 from langchain.llms.base import LLM
 from typing import Optional, List
+from src.util.logger import logger
 
 # Not used currently, but could be extended for more features
 class OllamaClient(LLM):
@@ -12,9 +13,9 @@ class OllamaClient(LLM):
         if hasattr(prompt, "to_string"):
           prompt = prompt.to_string()
 
-        print("=====OLLAMA PROMPT=====")
-        print(prompt)
-        print("========================")
+        logger.info("=====OLLAMA PROMPT=====")
+        logger.info(prompt)
+        logger.info("========================")
 
         headers = {
             "Content-Type": "application/json",
@@ -33,9 +34,9 @@ class OllamaClient(LLM):
 
         response = data.get("choices", "")[0].get("text", "No response")
 
-        print("=====OLLAMA RESPONSE=====")
-        print(response)
-        print("========================")
+        logger.info("=====OLLAMA RESPONSE=====")
+        logger.info(response)
+        logger.info("========================")
 
         return response
 

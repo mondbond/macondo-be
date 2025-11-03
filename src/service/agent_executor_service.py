@@ -4,16 +4,12 @@ from langchain_core.prompts import SystemMessagePromptTemplate, \
   HumanMessagePromptTemplate
 from pydantic import BaseModel
 from langchain.prompts import ChatPromptTemplate
-from langchain.chat_models import ChatOpenAI
-from langchain.tools import BaseTool
-from langchain.schema import AIMessage, HumanMessage, SystemMessage
 from src.llm.llm_provider import get_llm
 from src.tools.tools import wikipedia_info, final_result
+from src.util.logger import logger
 
 class ToolCalling(BaseModel):
   tool_name: str
-
-
 
 class CustomAgentExecutor():
     def __init__(self, llm,  prompt, tools, final_tool, max_iteration = 3):
@@ -42,12 +38,12 @@ class CustomAgentExecutor():
         agent_scratchpad = []
         while iteration < self.max_iteration:
             iteration += 1
-            print("Iteration:", iteration)
+            logger.info("Iteration:", iteration)
 
-            print("SCRATCHPAD:")
-            print(agent_scratchpad)
+            logger.info("SCRATCHPAD:")
+            logger.info(agent_scratchpad)
             response = self.runnable.invoke({"input": input["input"], "history" : input['history'], "agent_scratchpad": agent_scratchpad})
-            print("Response:" + str(response))
+            logger.info("Response:" + str(response))
 
             self.history.append(response)
 
@@ -61,8 +57,8 @@ class CustomAgentExecutor():
               tool_name = js["name"]
               tool_args = js["args"]
             except Exception as e:
-              print("Error parsing JSON or extracting tool call:", e)
-              print("Response content:", response.content)
+              logger.info("Error parsing JSON or extracting tool call:", e)
+              logger.info("Response content:", response.content)
 
             if tool_name is None:
               try :
@@ -72,10 +68,10 @@ class CustomAgentExecutor():
                 js = js[0]
                 tool_name = js["name"]
                 tool_args = js["arguments"]
-                print("TOOL CALLING INDERECTLY")
+                logger.info("TOOL CALLING INDERECTLY")
               except Exception as e:
-                print("Second attempt failed. Error parsing JSON or extracting tool call:", e)
-                print("Response content:", response.content)
+                logger.info("Second attempt failed. Error parsing JSON or extracting tool call:", e)
+                logger.info("Response content:", response.content)
 
 
             if tool_name in self.name2tool and tool_name != self.end_tool.name:
@@ -85,23 +81,22 @@ class CustomAgentExecutor():
               continue
 
             if tool_name == self.end_tool.name:
-              print("Final tool called, stopping iterations.")
+              logger.info("Final tool called, stopping iterations.")
               answer = str(tool_args)
               break
 
             # Check if the response indicates that we should stop
             if response.content != "":
-              print("Final answer found, stopping iterations.")
+              logger.info("Final answer found, stopping iterations.")
               answer = response.content
               break
             # Retrieve the tool object and invoke it properly
 
-        print(answer)
+        logger.info(answer)
         return answer
 
 
 if __name__ == "__main__":
-
 
   llm = get_llm()
   agent = CustomAgentExecutor(llm, ChatPromptTemplate.from_messages([

@@ -1,6 +1,7 @@
 import yaml
 from pathlib import Path
 from typing import Dict, Any, Optional
+from src.util.logger import logger
 
 
 class PromptManager:
@@ -69,7 +70,7 @@ prompt_manager = PromptManager()
 
 if __name__ == "__main__":
   pm = PromptManager()
-  print(pm.list_prompts())
+  logger.info(pm.list_prompts())
   prompt_text = pm.get_prompt("context_based_answer")
-  print(prompt_text)
-  print(pm.list_versions("example_prompt"))
+  logger.info(prompt_text)
+  logger.info(pm.list_versions("example_prompt"))

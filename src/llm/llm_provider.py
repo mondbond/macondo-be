@@ -2,6 +2,7 @@ from src.util.env_property import get_env_property
 from langchain_ollama import ChatOllama
 import boto3
 from langchain_aws import ChatBedrockConverse
+from src.util.logger import logger
 
 # llm = OllamaClient(base_url="http://localhost:11434", model="mistral:instruct")
 # llm = OllamaClient(base_url="http://host.docker.internal:11434", model="mistral:instruct")
@@ -37,14 +38,17 @@ def bedrock_client(temperature=0):
   )
 
 
-def get_llm(temperature=0, specific_source: str = "LLM_SOURCE"):
+def get_llm(temperature=0, specific_source: str = "LLM_SOURCE", source=None):
     llm_source = get_env_property(specific_source, "ollama")
 
+    if source is not None:
+      llm_source = source
+
     if llm_source == "ollama":
-        print("llm_provider: using ollama client")
+        logger.info("llm_provider: using ollama client")
         return local_ollama_client(temperature)
     elif llm_source == "bedrock":
-      print("llm_provider: using bedrock client")
+      logger.info("llm_provider: using bedrock client")
       return bedrock_client(temperature)
 
     return local_ollama_client()

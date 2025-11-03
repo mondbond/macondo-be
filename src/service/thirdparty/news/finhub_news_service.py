@@ -4,6 +4,7 @@ from src.util.env_property import get_env_property
 import finnhub
 from datetime import datetime, timedelta
 import time
+from src.util.logger import logger
 
 FINNHUB_API_KEY = get_env_property("FINNHUB_API_KEY", "sandbox_c0m8n2qad3i8e1f5g5g0")
 
@@ -49,9 +50,9 @@ def form_article_test(article_data):
 
     article_text = article.text
     article_result+=article_text
-    print(f"Fetched article {url} with length {len(article_text)}")
+    logger.info(f"Fetched article {url} with length {len(article_text)}")
   except Exception as e:
-    print(f"Failed fetch article {url}. exception is {e} Return summary instead.")
+    logger.info(f"Failed fetch article {url}. exception is {e} Return summary instead.")
     alternative_summary = article_data.get('headline', 'No headline') + ". " + article_data.get("summary", "No summary available.")
     article_result += alternative_summary
 
@@ -60,6 +61,7 @@ def form_article_test(article_data):
 # --HEADLINES
 def fetch_company_news(ticker, filter_by_name=True, later_than_hours_filter=24, max_articles=5):
   counter = 0
+  ticker = ticker.strip()
   now = datetime.utcnow()
   six_hours_ago = now - timedelta(hours=later_than_hours_filter)
   yesterday = now - timedelta(days=1)
@@ -68,7 +70,7 @@ def fetch_company_news(ticker, filter_by_name=True, later_than_hours_filter=24, 
 
   # Fetch all news from today (UTC-based)
   news_items = finnhub_client.company_news(ticker, _from=yesterday_str, to=today_str)
-  print(f"HEADLINES: {news_items}")
+  logger.info(f"HEADLINES: {news_items}")
 
   result = []
   for item in news_items:
@@ -79,7 +81,7 @@ def fetch_company_news(ticker, filter_by_name=True, later_than_hours_filter=24, 
       if (ticker not in item.get("headline", "") and ticker not in item.get("summary", "")
           and ticker_to_company_name.get(ticker, '!@#!@#') not in item.get("headline", "")
           and ticker_to_company_name.get(ticker, '23423') not in item.get('summary', "")):
-        print(f"Skipping as no naming for {ticker}, headline: {item.get('headline', '')}.")
+        logger.info(f"Skipping as no naming for {ticker}, headline: {item.get('headline', '')}.")
         continue
 
     timestamp = datetime.utcfromtimestamp(item.get("datetime", 0))
@@ -105,4 +107,4 @@ def fetch_company_news(ticker, filter_by_name=True, later_than_hours_filter=24, 
 
 
 if __name__ == "__main__":
-  print(fetch_company_news("TSLA", filter_by_name=True))
+  logger.info(fetch_company_news("TSLA", filter_by_name=True))

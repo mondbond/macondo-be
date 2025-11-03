@@ -1,5 +1,6 @@
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.store.memory import InMemoryStore
+from src.util.logger import logger
 
 from src.llm.llm_provider import get_llm
 from src.util.prompt_manager import prompt_manager
@@ -30,7 +31,10 @@ class SummaryChatHistory():
       summarized_history = self.summarise_history(history)
       self.memory.put(namespace, "chat", summarized_history)
 
+    logger.info(f"HISTORY IS: {history}")
+
   def is_history_too_long(self, history):
+    logger.info(f"IS HISTORY TO LONG?: {history}")
     total_length = sum(len(msg) for role, msg in history)
     return total_length > self.window_size
 

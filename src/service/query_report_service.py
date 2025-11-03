@@ -6,6 +6,7 @@ from langchain.chains import create_retrieval_chain
 
 from src.service.file_format_service import soup_html_to_text
 from src.usecase.report_uc import save_text_report
+from src.util.logger import logger
 
 def base_query_report_question_answer(ticker: str, query: str, join=True):
   retrieval = db_client.get_base_retriever(type="similarity", ticker=ticker)
@@ -22,7 +23,7 @@ def base_query_report_question_answer_full_state(ticker: str, query: str):
   result = retrieval.get_relevant_documents(query)
   all_text = "\n".join(doc.page_content for doc in result)
 
-  question_answer_prompt = PromptTemplate(template=prompt_manager.get_prompt('joke_test'), input_variables=["input", "context"])
+  question_answer_prompt = PromptTemplate(template=prompt_manager.get_prompt('context_based_answer'), input_variables=["input", "context"])
   chain = question_answer_prompt | get_llm()
 
   answer = chain.invoke({"input": query, "context": all_text})
@@ -61,4 +62,4 @@ if __name__ == "__main__":
 
   out = base_query_report_question_answer_full_state(query="What is the main competitor of UBER by it's report?", ticker="UBER")
 
-  print(out['answer'])
+  logger.info(out['answer'])

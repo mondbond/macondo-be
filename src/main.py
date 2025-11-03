@@ -5,6 +5,7 @@ from src.service.graph.router import start_graph_v2
 from pydantic import BaseModel
 from fastapi import FastAPI, File, UploadFile
 from src.usecase import report_uc as report_use_case
+from src.util.logger import logger
 
 app = FastAPI(title="MACONDO-BE")
 
@@ -31,7 +32,7 @@ async def save_report(file: UploadFile = File(...),
   content_type = file.content_type
   file = await file.read()
 
-  print(f"ENDPOINT: /report/ save report {ticker}")
+  logger.info(f"ENDPOINT: /report/ save report {ticker}")
 
   metadata = {"ticker": ticker, "date": date}
   report_use_case.save_report(file, metadata, content_type)
@@ -39,13 +40,13 @@ async def save_report(file: UploadFile = File(...),
 
 @app.get("/report/")
 async def get_all_reports():
-  print("GET /report/")
+  logger.info("GET /report/")
   reports = report_use_case.get_report_list()
   return {"reports": reports}
 
 @app.delete("/report/")
 async def delete_report(ticker: str):
-  print("DELETE /report/")
+  logger.info("DELETE /report/")
   report_use_case.delete_report(ticker)
   return {}
 
@@ -57,6 +58,6 @@ class Ask(BaseModel):
 # endpoint to check llm connection
 @app.post("/ask/")
 async def ask(ask: Ask):
-  print("POST /ask/")
+  logger.info("POST /ask/")
   llm = get_llm()
   return llm.invoke(ask.ask).content

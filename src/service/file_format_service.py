@@ -1,13 +1,15 @@
+from docling_core.types.io import DocumentStream
 from pypdf import PdfReader
 from io import BytesIO
-import re
 
 from bs4 import BeautifulSoup
+from src.util.logger import logger
+from docling.document_converter import DocumentConverter
 
 def any_format_to_str(file, content_type):
   if content_type == "text/html":
-    return soup_html_to_text(file)
-
+    # return soup_html_to_text(file)
+    return parse_text_by_docling(file)
   if content_type == "application/pdf":
     return pdf_to_text(file)
 
@@ -28,3 +30,22 @@ def pdf_to_text(pdf):
         if text:
             full_text.append(text)
     return " ".join(full_text)
+
+def parse_text_by_docling(file):
+    converter = DocumentConverter()
+    stream = DocumentStream(
+        name="uploaded_file",
+        # mime_type="text/html",
+        stream=BytesIO(file)
+    )
+
+    result = converter.convert(stream)
+    return result.document.export_to_markdown()
+    # return stream.document.export_to_markdown()
+    # return result.document.export_to_text()
+    # return result.document.export_to_dict()
+
+
+if __name__ == "__main__":
+    # logger.info(parse_text_by_docling("/Users/ibahr/Desktop/reports/AAPL.html"))
+    logger.info(any_format_to_str("/Users/ibahr/Desktop/reports/AAPL.html", "text/html"))

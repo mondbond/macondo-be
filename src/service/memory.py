@@ -4,7 +4,7 @@ from langchain_core.prompts import PromptTemplate, SystemMessagePromptTemplate, 
   HumanMessagePromptTemplate, ChatPromptTemplate
 
 from src.llm.llm_provider import get_llm
-
+from src.util.logger import logger
 
 class SummaryChatMessageHistory(BaseChatMessageHistory):
 
@@ -15,7 +15,7 @@ class SummaryChatMessageHistory(BaseChatMessageHistory):
 
     def add_message(self, message):
         self.messages.append(message)
-        print(str(self.messages))
+        logger.info(str(self.messages))
         if len(self.messages) > self.max_messages:
             # Summarize the oldest messages
             self.summarize_oldest_messages()
@@ -27,7 +27,7 @@ class SummaryChatMessageHistory(BaseChatMessageHistory):
         return self.messages
 
     def summarize_oldest_messages(self):
-      print(str(self.messages))
+      logger.info(str(self.messages))
 
       template = ChatPromptTemplate.from_messages([
         SystemMessagePromptTemplate.from_template("You are a helpful assistant that summarizes conversations. You are not continuing the conversation, just summarizing it. Summarize the following messages into a concise summary that captures the key points and context. The summary should be brief and to the point."),
@@ -41,6 +41,6 @@ class SummaryChatMessageHistory(BaseChatMessageHistory):
       self.clear()
       self.add_message(SystemMessage(content=result))
 
-      print(str(self.messages))
-      print("========= Summarizing messages =========")
+      logger.info(str(self.messages))
+      logger.info("========= Summarizing messages =========")
 

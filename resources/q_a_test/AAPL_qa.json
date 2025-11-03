@@ -1,0 +1,51 @@
+[
+  {
+    "id": 1,
+    "question": "What products does Apple design and sell?",
+    "reference": "Apple designs, manufactures and sells smartphones, computers, tablets, wearables, accessories, and related services. It includes products like the iPhone, Mac, iPad."
+  },
+  {
+    "id": 2,
+    "question": "Does Apple sales have seasonal fluctuations? At what times of the year?",
+    "reference": "It has the highest sales in first quartal."
+  },
+  {
+    "id": 3,
+    "question": "Which major products did the Company announce in the fourth quarter of fiscal year 2024?",
+    "reference": "iPhone 16, iPhone 16 Plus, iPhone 16 Pro, iPhone 16 Pro Max, Apple Watch Series 10, and AirPods 4."
+  },
+  {
+    "id": 4,
+    "question": "What is the change in total sales in Japan it year 2024 compare to 2023?",
+    "reference": "Change is 3%"
+  },
+  {
+    "id": 5,
+    "question": "How did iPad sales perform in 2024 compared to 2023?",
+    "reference": "iPad net sales decreased during 2024 compared to 2023 due primarily to lower net sales of iPad Pro and the entry-level iPad models, partially offset by higher net sales of iPad Air.\n"
+  },  {
+    "id": 6,
+    "question": "What is the revenue from selling iPhone in 2022?",
+    "reference": "205,489 million USD"
+  },
+  {
+  "id": 7,
+  "question": "Which payment services does the Company offer?",
+  "reference": "Apple Card and Apple Pay."
+  },
+  {
+    "id": 8,
+    "question": "What are the gross margin percentage for products and services in 2024?",
+    "reference": "Gross margin percentage for products was 37.2 % and for services was 73.9 % in 2024."
+  },
+  {
+    "id": 9,
+    "question": "Why is the Company facing increased regulatory and legal risks in the U.S. and EU?",
+    "reference": "Because of regulatory scrutiny, antitrust investigations, and compliance obligations like the EU Digital Markets Act, which have led the Company to make App Store and software changes and face ongoing litigation and potential fines."
+  },
+  {
+    "id": 10,
+    "question": "What factors contribute to the volatility of the Company’s stock price?",
+    "reference": "The Company’s stock price can fluctuate due to market-wide volatility, investor expectations about growth, profitability, dividends, and share repurchases, and because it may not always align with actual operating performance."
+  }
+]

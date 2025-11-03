@@ -1,5 +1,6 @@
 from langchain_core.tools import tool
 from pydantic import Field, BaseModel
+from src.util.logger import logger
 
 from src.service.query_report_service import report_rephrase_retriever_search, base_query_report_question_answer
 from src.service.thirdparty.news.finhub_news_service import fetch_company_news
@@ -12,11 +13,12 @@ class WikipediaSearchByNoun(BaseModel):
 @tool(args_schema=WikipediaSearchByNoun)
 def wikipedia_info(noun_to_search: str) -> str:
   """Always call this tool if you need to know something to before answer to user. Fetch general summary information from Wikipedia for a given noun. Some noun (usually) is expected."""
+  logger.info("WIKIPEDIA INFO tool called with noun: " + str(noun_to_search))
   wiki = wikipediaapi.Wikipedia(
       language='en',
       user_agent='my-app-name/0.1 (https://mywebsite.example.com)')
 
-  page = wiki.page(noun_to_search)
+  page = wiki.page(noun_to_search.strip())
   return str(page.summary)
 
 
@@ -27,7 +29,7 @@ class FinalAnswer(BaseModel):
 @tool
 def final_result(final_answer: str) -> str:
   """Tool to call when you have the final answer to provide to the user. This MUST be the last tool you call in any session."""
-  print("FINAL RESULT tool called ========== " + str(final_answer))
+  logger.info("FINAL RESULT tool called ========== " + str(final_answer))
 
   return "ANSWER FROM WIKIPEDIA: " + str(final_answer)
 
@@ -43,11 +45,18 @@ class SearchInReportInput(BaseModel):
       description="User's natural language question about the company's report. Cannot be null."
   )
 
-@tool(args_schema=SearchInReportInput)
+class SearchLatestNews(BaseModel):
+    ticker: str = Field(
+        ...,
+        description="Stock ticker symbol (e.g. AAPL, GOOGL, MSFT). This field is required and cannot be null. Use value near the word 'ticker' in user's question.",
+    )
+
+@tool(args_schema=SearchLatestNews)
 def search_company_news(ticker: str) -> str:
   """
-  Call this tool in any situation providing question and ticker (AAPL) by default) to fetch latest news for given ticker
+  Call this tool in any situation providing question and ticker to fetch latest news for given ticker
   """
+  logger.info("Latest news tool called with ticker: " + str(ticker))
   response = fetch_company_news(ticker)
 
   return response

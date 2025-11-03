@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import json
 import requests
 import time
+from src.util.logger import logger
 
 from src.util.env_property import get_env_property
 
@@ -76,7 +77,7 @@ class PriceFactory():
         time.sleep(2)
 
         if fail_counter > 5:
-          print(f"Failed to fetch price for {self.tickers[self.ticker_counter]}")
+          logger.info(f"Failed to fetch price for {self.tickers[self.ticker_counter]}")
           break
 
         stock_price = self.get_price()
@@ -120,11 +121,11 @@ class PriceProviderTwelveData(PriceProvider):
     try:
       today_price = float(data['values'][0]['close'])
       yesterday_price = float(data['values'][1]['close'])
-      print("get data from twelvedata for ticker: " + ticker)
+      logger.info("get data from twelvedata for ticker: " + ticker)
 
       return StockPrice.init_with_price(ticker, today_price, yesterday_price)
     except Exception as e:
-      print(f"{type(self)} Failed to fetch price for {ticker}. response is: {data}")
+      logger.info(f"{type(self)} Failed to fetch price for {ticker}. response is: {data}")
       return None
 
 
@@ -143,10 +144,10 @@ class PriceProviderFinHub(PriceProvider):
     try:
       today_price = float(data['c'])
       change = float(data['dp'])
-      print("get data from finhub for ticker: " + ticker)
+      logger.info("get data from finhub for ticker: " + ticker)
       return StockPrice.init_with_change(ticker, today_price, change)
     except Exception:
-      print(f"{type(self)} Failed to fetch price for {ticker}. response is: {data}")
+      logger.info(f"{type(self)} Failed to fetch price for {ticker}. response is: {data}")
       return None
 
 price_provider1 = PriceProviderFinHub(FINNHUB_API_KEY)

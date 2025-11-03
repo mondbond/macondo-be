@@ -10,6 +10,7 @@ from src.service.file_format_service import soup_html_to_text
 from src.service.query_report_service import base_query_report_question_answer
 from src.usecase.report_uc import save_text_report
 from src.util.prompt_manager import prompt_manager
+from src.util.logger import logger
 
 FETCH_NODE = "FETCH_NODE"
 ANSWER_NODE = "ANSWER_NODE"
@@ -276,8 +277,8 @@ def run_subquery_search_in_report(ticker: str, question: str) -> str:
 }
 
   final_state = app.invoke(initial_state)
-  print("\n=== FINAL STATE ===")
-  print(final_state)
+  logger.info("\n=== FINAL STATE ===")
+  logger.info(final_state)
   return final_state['final_answer']
 
 
@@ -310,56 +311,58 @@ def run_subquery_search_in_report_full_state(ticker: str, question: str) -> dict
   }
 
   final_state = app.invoke(initial_state)
-  print("\n=== FINAL STATE ===")
-  print(final_state)
+  logger.info("\n=== FINAL STATE ===")
+  logger.info(final_state)
   return final_state
 
 
 if __name__ == "__main__":
 
-  import os
-  for k in ["LANGSMITH_TRACING", "LANGSMITH_ENDPOINT", "LANGSMITH_API_KEY", "LANGSMITH_PROJECT"]:
-    print(k, "=", os.getenv(k))
+  # import os
+  # for k in ["LANGSMITH_TRACING", "LANGSMITH_ENDPOINT", "LANGSMITH_API_KEY", "LANGSMITH_PROJECT"]:
+  #   logger.info(k, "=", os.getenv(k))
+  #
+  # # with open("/Users/ibahr/Downloads/synthetic_report.pdf", "rb") as f:
+  # with open("/Users/ibahr/Desktop/reports/UBER.html", "rb") as f:
+  #   pdf_content = f.read()
+  #   report = soup_html_to_text(pdf_content)
+  #
+  #   metadata = {
+  #     "ticker": "UBER",
+  #     "date": "2025-07-17"
+  #   }
+  #
+  # # save_report(pdf_content, metadata)
+  # save_text_report(report, metadata)
+  #
+  # initial_state: SubqueryRetrievalConfig = {
+  #   "ticker": "UBER",
+  #   "original_question": "What are the key risks for Company Uber in the latest 10-K report?",
+  #   "original_answer": None,
+  #
+  #   "last_review": None,
+  #   "iteration": 0,
+  #
+  #   "questions": [],
+  #   "all_data": [],
+  #
+  #   "max_iterations": 1,
+  #   "min_iterations": 0,
+  #
+  #   "context_threshold": 2000,
+  #   "compression_coef": 0.7,
+  #
+  #   "answer_prompt": SystemMessage(prompt_manager.get_prompt("rephrase_retrieval_uc_answer")),
+  #   "compare_prompt": SystemMessage(prompt_manager.get_prompt('rephrase_retrieval_uc_answer_comparator')),
+  #   "subquery_prompt": SystemMessage(prompt_manager.get_prompt('rephrase_retrieval_uc_rephrase_question')),
+  #   "compression_prompt": SystemMessage(prompt_manager.get_prompt("rephrase_retrieval_uc_compression")),
+  #   "synthetic_answer_prompt": SystemMessage(prompt_manager.get_prompt("rephrase_retrieval_uc_synthetic_answer")),
+  #
+  #   "final_answer": None
+  # }
+  #
+  # final_state = app.invoke(initial_state)
+  # logger.info("\n=== FINAL STATE ===")
+  # logger.info(final_state)
+  logger.info(app.get_graph().draw_mermaid())
 
-  # with open("/Users/ibahr/Downloads/synthetic_report.pdf", "rb") as f:
-  with open("/Users/ibahr/Desktop/reports/UBER.html", "rb") as f:
-    pdf_content = f.read()
-    report = soup_html_to_text(pdf_content)
-
-    metadata = {
-      "ticker": "UBER",
-      "date": "2025-07-17"
-    }
-
-  # save_report(pdf_content, metadata)
-  save_text_report(report, metadata)
-
-  initial_state: SubqueryRetrievalConfig = {
-    "ticker": "UBER",
-    "original_question": "What are the key risks for Company Uber in the latest 10-K report?",
-    "original_answer": None,
-
-    "last_review": None,
-    "iteration": 0,
-
-    "questions": [],
-    "all_data": [],
-
-    "max_iterations": 1,
-    "min_iterations": 0,
-
-    "context_threshold": 2000,
-    "compression_coef": 0.7,
-
-    "answer_prompt": SystemMessage(prompt_manager.get_prompt("rephrase_retrieval_uc_answer")),
-    "compare_prompt": SystemMessage(prompt_manager.get_prompt('rephrase_retrieval_uc_answer_comparator')),
-    "subquery_prompt": SystemMessage(prompt_manager.get_prompt('rephrase_retrieval_uc_rephrase_question')),
-    "compression_prompt": SystemMessage(prompt_manager.get_prompt("rephrase_retrieval_uc_compression")),
-    "synthetic_answer_prompt": SystemMessage(prompt_manager.get_prompt("rephrase_retrieval_uc_synthetic_answer")),
-
-    "final_answer": None
-  }
-
-  final_state = app.invoke(initial_state)
-  print("\n=== FINAL STATE ===")
-  print(final_state)

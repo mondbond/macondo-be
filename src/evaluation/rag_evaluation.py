@@ -16,18 +16,25 @@ from src.service.graph.core.subquery_retrieval_graph1 import \
 from src.service.query_report_service import base_query_report_question_answer_full_state
 from src.usecase.report_uc import save_text_report
 from src.util.prompt_manager import prompt_manager
+from src.util.logger import logger
+from src.util.logger import logger
+
+from src.usecase.report_uc import save_report
 
 #DATA PREPARATION
-with open("/Users/ibahr/Desktop/reports/AAPL.html", "rb") as f:
-  pdf_content = f.read()
-  report = soup_html_to_text(pdf_content)
+# with open("/Users/ibahr/Desktop/reports/AAPL.html", "rb") as f:
+#   pdf_content = f.read()
+#   report = soup_html_to_text(pdf_content)
+#
+#   metadata = {
+#     "ticker": "AAPL",
+#     "date": "2025-07-17"
+#   }
+#
+#   save_text_report(report, metadata)
 
-  metadata = {
-    "ticker": "AAPL",
-    "date": "2025-07-17"
-  }
+save_report("/Users/ibahr/Desktop/reports/AAPL.html", {"ticker": "AAPL", "date": "2025-07-08"}, "text/html")
 
-  save_text_report(report, metadata)
 
 # TEST QUESTIONS
 test_question_list = [
@@ -153,9 +160,9 @@ circular_app_recorder = TruApp(
 
 with circular_app_recorder as recording:
   for test_question in test_question_list:
-    print("Running test question: " + test_question)
+    logger.info("Running test question: " + test_question)
     llm_response = rephrase_circular_rag_app.rag_wrapper(test_question)
-    print("LLM response:", llm_response)
+    logger.info("LLM response:", llm_response)
 
 
 simple_search_rag_recorder = TruApp(
@@ -169,21 +176,21 @@ simple_search_rag_recorder = TruApp(
 
 with simple_search_rag_recorder as recording:
   for test_question in test_question_list:
-    print("Running test question: " + test_question)
+    logger.info("Running test question: " + test_question)
     llm_response = simple_search_rag_app.rag_wrapper(test_question)
-    print("LLM response:", llm_response)
+    logger.info("LLM response:", llm_response)
 
 
 time.sleep(15)
 records, feedback = session.get_records_and_feedback()
 
-print("Recorded feedback:", records)
-print("Recorded feedback:", feedback)
+logger.info("Recorded feedback:", records)
+logger.info("Recorded feedback:", feedback)
 
 
 from trulens.dashboard import run_dashboard
 run_dashboard(session)
 
 for rec in records:
-  print(rec)
+  logger.info(rec)
 

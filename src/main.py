@@ -1,11 +1,15 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Form
 
 from src.llm.llm_provider import get_llm
 from src.service.graph.router import start_graph_v2
 from pydantic import BaseModel
 from fastapi import FastAPI, File, UploadFile
 from src.usecase import report_uc as report_use_case
+from src.usecase.image_uc import save_image_embeddings
 from src.util.logger import logger
+from PIL import Image
+import io
+import json
 
 app = FastAPI(title="MACONDO-BE")
 
@@ -61,3 +65,19 @@ async def ask(ask: Ask):
   logger.info("POST /ask/")
   llm = get_llm()
   return llm.invoke(ask.ask).content
+
+
+@app.post("/upload_image/")
+async def upload_image(
+    file: UploadFile = File(...),
+    metadata: str = Form(...),
+    link: str = Form(...),
+):
+    logger.info(f"POST /upload_image/ with link {link} and metadata {metadata}")
+    image_bytes = await file.read()
+    try:
+        metadata_dict = json.loads(metadata)
+    except Exception:
+        metadata_dict = {}
+    doc_id = save_image_embeddings(image_bytes, metadata=metadata_dict, link=link)
+    return {"id": doc_id}

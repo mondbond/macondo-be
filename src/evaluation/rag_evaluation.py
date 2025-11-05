@@ -1,12 +1,14 @@
 from langchain.chains import LLMChain
 from langchain.prompts.chat import ChatPromptTemplate, SystemMessagePromptTemplate
 from langchain_core.prompts import HumanMessagePromptTemplate
+from langchain_core.runnables import RunnableLambda
 from trulens.apps.app import TruApp
 import json
 from trulens.core import TruSession, Feedback
 import time
 from trulens.core.otel.instrument import instrument
 from trulens.otel.semconv.trace import SpanAttributes
+from pydantic import BaseModel, Field
 
 from src.llm.llm_provider import get_llm
 from src.models.constants import LLM_CHEEP_SOURCE, LLM_JUDGE_SOURCE
@@ -18,8 +20,9 @@ from src.usecase.report_uc import save_text_report
 from src.util.prompt_manager import prompt_manager
 from src.util.logger import logger
 from src.util.logger import logger
-
+import time
 from src.usecase.report_uc import save_report
+from langchain.schema.runnable import RunnableLambda
 
 #DATA PREPARATION
 # with open("/Users/ibahr/Desktop/reports/AAPL.html", "rb") as f:
@@ -33,7 +36,9 @@ from src.usecase.report_uc import save_report
 #
 #   save_text_report(report, metadata)
 
-save_report("/Users/ibahr/Desktop/reports/AAPL.html", {"ticker": "AAPL", "date": "2025-07-08"}, "text/html")
+with open('/Users/ibahr/Desktop/reports/AAPL.html', 'rb') as f:
+  file_bytes = f.read()
+  save_report(file_bytes, {"ticker": "AAPL", "date": "2025-07-08"}, "text/html")
 
 
 # TEST QUESTIONS
@@ -49,6 +54,19 @@ test_question_list = [
 session = TruSession()
 session.reset_database()
 
+
+def extract_score(result):
+  logger.info("Extracting score from result:", result)
+  if hasattr(result, "text"):
+    return str(result.text)
+  if hasattr(result, "score"):
+    return str(result.score)
+  return str(result)
+
+class EvaluationScore(BaseModel):
+  score: str = Field(description="Score from 0.0 to 1.0")
+
+
 # ANSWER RELEVANCE EVALUATION CHAIN
 answer_relevance_criteria_prompt = SystemMessagePromptTemplate.from_template(prompt_manager.get_prompt("answer_relevance"))
 human_prompt = HumanMessagePromptTemplate.from_template("""
@@ -57,8 +75,8 @@ Model answer: {answer}
 """)
 answer_relevance_prompt = ChatPromptTemplate.from_messages([answer_relevance_criteria_prompt, human_prompt])
 
-llm = get_llm(specific_source=LLM_JUDGE_SOURCE)
-answer_relevance_criteria_chain = LLMChain(llm=llm, prompt=answer_relevance_prompt, verbose=True)
+llm_aw = get_llm(specific_source=LLM_JUDGE_SOURCE).with_structured_output(EvaluationScore) | RunnableLambda(extract_score)
+answer_relevance_criteria_chain = LLMChain(llm=llm_aw, prompt=answer_relevance_prompt, verbose=True)
 
 
 # GROUNDEDNESS EVALUATION CHAIN
@@ -70,8 +88,8 @@ Your groundedness score (0.0 to 1.0):
 """)
 
 groundedness_prompt = ChatPromptTemplate.from_messages([groundedness_criteria_prompt, groundedness_human_prompt])
-llm = get_llm(specific_source=LLM_JUDGE_SOURCE)
-groundedness_criteria_chain = LLMChain(llm=llm, prompt=groundedness_prompt, verbose=True)
+llm_g = get_llm(specific_source=LLM_JUDGE_SOURCE).with_structured_output(EvaluationScore) | RunnableLambda(extract_score)
+groundedness_criteria_chain = LLMChain(llm=llm_g, prompt=groundedness_prompt, verbose=True)
 
 
 # CONTEXT RELEVANCE EVALUATION CHAIN
@@ -82,29 +100,41 @@ Model context: {context}
 """)
 context_relevance_prompt = ChatPromptTemplate.from_messages([context_relevance_criteria_prompt, context_prompt])
 
-llm = get_llm(specific_source=LLM_JUDGE_SOURCE)
-context_relevance_criteria_chain = LLMChain(llm=llm, prompt=context_relevance_prompt, verbose=True)
+llm_cr = get_llm(specific_source=LLM_JUDGE_SOURCE).with_structured_output(EvaluationScore) | RunnableLambda(extract_score)
+context_relevance_criteria_chain = LLMChain(llm=llm_cr, prompt=context_relevance_prompt,  verbose=True)
 
 
 # METRIC FUNCTIONS
 def custom_relevance(prompt: str, res: dict) -> str:
   res = json.loads(res)
-  final_answer = str(answer_relevance_criteria_chain.invoke({"question": res['question'], "answer": res['final_answer']})['text']).strip()
-  return str(final_answer)
+  time.sleep(10)
+  final_answer = answer_relevance_criteria_chain.invoke({"question": res['question'], "answer": res['final_answer']})
+  logger.info(f"Relevance score: {final_answer}")
+
+  logger.info("Verdict:", final_answer['text'])
+  return str(final_answer['text'])
 
 def custom_groundedness(prompt: str, res: dict) -> str:
   res = json.loads(res)
+  time.sleep(10)
   answer = res['final_answer']
   context = res['context']
-  final_answer = str(groundedness_criteria_chain.invoke({"context": context, "answer": answer})['text']).strip()
-  return str(final_answer)
+  final_answer = groundedness_criteria_chain.invoke({"context": context, "answer": answer})
+  logger.info(f"Groundedness score: {final_answer}")
+
+  logger.info("Verdict:", final_answer['text'])
+  return str(final_answer['text'])
 
 def custom_contex_relevance(prompt: str, res: dict) -> str:
   res = json.loads(res)
+  time.sleep(10)
   question = res['question']
   context = res['context']
-  final_answer = str(context_relevance_criteria_chain.invoke({"question": question, "context": context})['text']).strip()
-  return str(final_answer)
+  final_answer = context_relevance_criteria_chain.invoke({"question": question, "context": context})
+  logger.info(f"Context relevance score: {final_answer}")
+
+  logger.info("Verdict:", final_answer['text'])
+  return str(final_answer['text'])
 
 
 # TEST WRAPPER
@@ -143,7 +173,7 @@ rephrase_circular_rag_app = RephraseCircularRagWrapper()
 simple_search_rag_app = SimpleSearchRagWrapper()
 
 # Feedbacks
-relevance_feedback = (Feedback(custom_relevance).on_input_output())
+relevance_feedback = (Feedback(custom_relevance, name="ANSWER RELEVANCE").on_input_output())
 groundedness_feedback = (Feedback(custom_groundedness, name="GROUNDEDNESS").on_input_output())
 context_relevance_feedback = (Feedback(custom_contex_relevance, name="CONTEXT RELEVANCE").on_input_output())
 
@@ -160,6 +190,7 @@ circular_app_recorder = TruApp(
 
 with circular_app_recorder as recording:
   for test_question in test_question_list:
+    time.sleep(10)
     logger.info("Running test question: " + test_question)
     llm_response = rephrase_circular_rag_app.rag_wrapper(test_question)
     logger.info("LLM response:", llm_response)
@@ -176,6 +207,7 @@ simple_search_rag_recorder = TruApp(
 
 with simple_search_rag_recorder as recording:
   for test_question in test_question_list:
+    time.sleep(10)
     logger.info("Running test question: " + test_question)
     llm_response = simple_search_rag_app.rag_wrapper(test_question)
     logger.info("LLM response:", llm_response)

@@ -3,6 +3,7 @@ from langchain_ollama import ChatOllama
 import boto3
 from langchain_aws import ChatBedrockConverse
 from src.util.logger import logger
+import time
 
 # llm = OllamaClient(base_url="http://localhost:11434", model="mistral:instruct")
 # llm = OllamaClient(base_url="http://host.docker.internal:11434", model="mistral:instruct")
@@ -14,8 +15,8 @@ def local_ollama_client(temperature=0):
   return ChatOllama(base_url=get_env_property("LLM_URL"), model="mistral:instruct", verbose=True, temperature=temperature)
 
 def bedrock_client(temperature=0):
-
   bedrock_id = get_env_property("BEDROCK_MODEL", None)
+  time.sleep(5)
 
   # Optional: specify a profile name
   session = boto3.Session()

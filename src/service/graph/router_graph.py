@@ -8,6 +8,7 @@ from src.service.graph.fall_explanation_graph import \
 from src.service.graph.intention_service import classify_intent_with_prompt
 from src.service.graph.news_search_reflection_summary_graph import \
   run_news_graph
+from src.usecase.image_uc import search_image_embeddings_link
 from src.util.logger import logger
 
 from langgraph.types import Command
@@ -31,6 +32,7 @@ class RouterState(TypedDict, total=False):
   data: SummaryChatHistory
   ticker: list[str]
   intent: UserIntentionEnum
+  image_wanted: bool
   action: str
 
 class MemoryNode(SummaryChatHistory):
@@ -54,11 +56,12 @@ def classify_intent(state: RouterState) -> dict:
   ticker = user_intention.ticker
   state['ticker'] = ticker
   state['intent'] = user_intention.intention
+  state['image_wanted'] = user_intention.image_wanted
   return state
 
 
 async def call_agent(query: str, history) -> str:
-  tools = [wikipedia_info, search_company_news]
+  tools = [wikipedia_info]
   llm = get_llm()
 
   mcp_url = get_env_property("MCP_FIN_URL")
@@ -98,7 +101,6 @@ async def call_agent(query: str, history) -> str:
 async def run_intent(state: RouterState) -> dict:
   intent = state["intent"]
 
-
   if intent == UserIntentionEnum.COMPANY_INFORMATION_FROM_REPORT and state["ticker"]:
     answer = run_subquery_search_in_report(state['ticker'][0], state['user_message'])
     state['bot_message'] = answer
@@ -112,6 +114,11 @@ async def run_intent(state: RouterState) -> dict:
   else:
     rs = await call_agent(state['user_message'], str(state['history']))
     state['bot_message'] =rs['output']
+
+  if state['image_wanted']:
+    link = search_image_embeddings_link(state['user_message'])
+    state['bot_message'] += f"\nI found this image that might help: {link}"
+
   return state
 
 

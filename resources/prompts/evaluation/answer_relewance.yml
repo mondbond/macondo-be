@@ -11,4 +11,13 @@ versions:
       or
       0.5
       or 0.0 if completely irrelevant
-      no more text in answer - only the score. Output should be structural and parsed
+    
+      Respond strictly in this JSON format:
+        
+          "score": "<value between 0.0 and 1.0>"
+        
+      
+      Example:
+        
+          "score": "0.85"
+        

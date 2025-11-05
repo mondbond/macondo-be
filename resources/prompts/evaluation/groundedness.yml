@@ -11,3 +11,15 @@ versions:
       - If the answer is entirely unsupported or contradicts the context, score it as 0.0 (not grounded).
       
       Respond with only a single floating-point number between 0.0 and 1.0. No need text in answer - only the score. Output should be structural and parsed
+
+      You are an evaluator that gives a single numeric score between 0.0 and 1.0.
+
+      Respond strictly in this JSON format:
+      
+        "score": "<value between 0.0 and 1.0>"
+      
+  
+      Example:
+      
+        "score": "0.85"
+      

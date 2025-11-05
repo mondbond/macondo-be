@@ -34,3 +34,9 @@ RouterDto is the structured output that determines:
       )
   )
 
+  image_wanted: bool = Field(
+      description=(
+        "Indicates whether the user desires visual content (like images charts or graphs) in the response. True if user explicitly requests visual data, False otherwise."
+      )
+  )
+

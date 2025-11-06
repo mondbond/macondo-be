@@ -59,7 +59,5 @@ if __name__ == "__main__":
     }
 
   save_text_report(report, metadata)
-
   out = base_query_report_question_answer_full_state(query="What is the main competitor of UBER by it's report?", ticker="UBER")
-
   logger.info(out['answer'])

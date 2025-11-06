@@ -35,7 +35,7 @@ class SummaryChatHistory():
 
   def is_history_too_long(self, history):
     logger.info(f"IS HISTORY TO LONG?: {history}")
-    total_length = sum(len(msg) for role, msg in history)
+    total_length = sum(len(msg) for role, msg in history if msg is not None)
     return total_length > self.window_size
 
   def sanitize_msg(self, msg: str) -> str:
@@ -65,7 +65,7 @@ class SummaryChatHistory():
     if history is None:
         history = []
 
-    return history
+    return history.value
 
 summary_memory = SummaryChatHistory(get_llm(), prompt_manager.get_prompt('trim_chat_history'), window_character_size=200)
 

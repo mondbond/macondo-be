@@ -6,6 +6,8 @@ from langchain_core.prompts import PromptTemplate, SystemMessagePromptTemplate, 
 from src.llm.llm_provider import get_llm
 from src.util.logger import logger
 
+# THIS FILE IS DEPRECATED AND WILL BE REMOVED IN THE FUTURE
+
 class SummaryChatMessageHistory(BaseChatMessageHistory):
 
     def __init__(self, max_messages=4):

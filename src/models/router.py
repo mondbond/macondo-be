@@ -5,7 +5,7 @@ from src.util.logger import logger
 class UserIntentionEnum(str, Enum):
   NEWS_ABOUT_COMPANY = "NEWS_ABOUT_COMPANY"
   COMPANY_INFORMATION_FROM_REPORT = "COMPANY_INFORMATION_FROM_REPORT"
-  NOT_RELATED = "NOT_RELATED"
+  OTHER_FINANCIAL_QUESTIONS = "OTHER_FINANCIAL_QUESTIONS"
   ANALYSE_SHARE_PRISE = "ANALYSE_SHARE_PRISE"
 
 class RouterDto(BaseModel):
@@ -22,15 +22,16 @@ RouterDto is the structured output that determines:
         ),
         examples=["AAPL", "GOOGL", "MSFT"],
         max_length=5,
-        min_length=1
+        min_length=0
     )
 
   intention: UserIntentionEnum = Field(
       description=(
         "Classify the user's high-level intention:\n"
-        "- NOT_RELATED -> Default option if the query is unrelated to stocks, tickers, or finance (e.g. 'What is the capital of France?'). Not choose it for finance-related queries.\n"
-        "- COMPANY_INFORMATION_FROM_REPORT → User wants **specific financial/report data** from an company report (requires ticker).\n"
-        "- ANALYSE_SHARE_PRISE → User wants to understande the reason for last share prices.\n"
+        "- OTHER_FINANCIAL_QUESTIONS -> Default option if any of the above is not strictly related. Choose this option even if question is not related to financials\n"
+        "- COMPANY_INFORMATION_FROM_REPORT → User wants **specific financial/report data** from an company report (requires ticker). Choose this when user ask you to get something from annual report strictly\n"
+        "- ANALYSE_SHARE_PRISE → User wants to understand the reason for last share prices drop. Choose this strictly when user says to *analyze* the recent stock price change\n"
+        "- NEWS_ABOUT_COMPANY → User wants recent news or updates about a specific company (requires ticker) from the news."
       )
   )
 

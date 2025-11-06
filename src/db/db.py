@@ -14,7 +14,11 @@ from src.llm.llm_provider import get_llm
 from src.util.prompt_manager import prompt_manager
 from src.util.logger import logger
 
-clip_embedder = OpenCLIPEmbeddings(model_name="ViT-g-14", checkpoint="laion2b_s34b_b88k")
+# normal version
+# clip_embedder = OpenCLIPEmbeddings(model_name="ViT-g-14", checkpoint="laion2b_s34b_b88k")
+
+# version for light aws deployment
+clip_embedder = OpenCLIPEmbeddings(model_name="ViT-B/32", checkpoint="laion2b_s34b_b79k")
 
 class FinReportVectorDB(abc.ABC):
 

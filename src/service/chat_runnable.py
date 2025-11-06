@@ -8,6 +8,8 @@ from src.llm.llm_provider import get_llm
 from langchain.chains import create_retrieval_chain
 from src.util.logger import logger
 
+# THIS FILE IS DEPRECATED AND WILL BE REMOVED IN THE FUTURE
+
 session_to_history = {}
 
 def get_history(session_id: int):

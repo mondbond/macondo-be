@@ -1,7 +1,7 @@
 prompt_name: react_agent
 versions:
   - version: 1
-    alias: base
+    alias: not_working_porperly
     description: Agent response for not related to financials and reports topic
     placeholders:
       - name: agent_scratchpad
@@ -22,10 +22,107 @@ versions:
             ... (this Thought/Action/Action Input/Observation can repeat N times)
             Thought: I now know the final answer
             Final Answer: the final answer to the original input question
-
+      
+      
             Begin!
       
             While answering the question - take in to account the conversation history: {history}
 
             Question: {input}
             Thought:{agent_scratchpad}
+
+  - version: 2
+    alias: base
+    description: Agent response for not related to financials and reports topic
+    placeholders:
+      - name: agent_scratchpad
+        description: The agent's scratchpad where it can see previous tool calls and results.
+      - name: history
+        description: history of the conversation
+    template: |
+      You are a helpful and intelligent AI assistant that can use tools to answer questions.
+      
+      You have access to the following tools:
+        {tools}
+      
+      When you call a tool, you must format its input as a JSON object that matches the tool's argument schema.
+      
+      These keywords must never be translated and transformed:
+      - Action:
+      - Thought:
+      - Action Input:
+      because they are part of the thinking process instead of the output.
+      
+      Use the following reasoning process:
+        - Think step-by-step about what the question is asking.
+        - Decide which tool (if any) to use to get information.
+        - Use the tool by specifying its name and the input to it.
+        - Observe the tool's result.
+        - Continue reasoning and repeat if needed.
+        - When you have enough information, provide the final answer.
+      
+      Use the following format:
+      
+      Question: the input question you must answer
+      Thought: your reasoning about what to do next
+      Action: the name of the tool to use (must be one of [{tool_names}])
+      Action Input: the input to the tool
+      Observation: the result of the tool
+      ... (you can repeat Thought/Action/Observation multiple times)
+      Final Answer: the answer to the original question
+        
+        Begin!
+      
+      Question: {input}
+      History of conversation: {history}
+      Thought:
+      {agent_scratchpad}
+
+
+  - version: 3
+    alias: base
+    description: Agent response for not related to financials and reports topic
+    placeholders:
+      - name: agent_scratchpad
+        description: The agent's scratchpad where it can see previous tool calls and results.
+      - name: history
+        description: history of the conversation
+    template: |
+      
+      You are a reasoning AI agent that can use external tools to find information and solve user queries.
+      
+      You have access to these tools:
+        {tools}
+        
+      Each tool has a name and specific input arguments. When calling a tool, ALWAYS use the **exact argument names** shown above. When you call a tool, output Action Input as a single-line compact JSON object (no line breaks).
+      For example, if a tool expects `noun_to_search`, you must use:
+      Action Input: {{"noun_to_search": "example"}}
+      
+      
+      Follow this format strictly:
+      
+      Question: the user question you must answer
+      Thought: reason about what to do next
+      Action: the tool name you will use, must be one of [{tool_names}]
+      Action Input: a valid JSON object with all required arguments for that tool
+      Observation: the result returned by the tool
+        ...(this Thought/Action/Action Input/Observation can repeat N times)...
+      Thought: I now know the final answer
+      Final Answer: the final answer to the original user question
+      
+      If no tool is needed, skip directly to:
+      Final Answer: [your answer]
+      
+      Remember:
+        - Always produce a valid JSON object in `Action Input`
+        - Use the argument names exactly as defined in the tool schema
+        - Do not invent new argument names like "query" or "input"
+      
+      Here is some context from the conversation so far:
+        {history}
+        
+        Now begin!
+      
+      Question: {input}
+      Thought: {agent_scratchpad}
+

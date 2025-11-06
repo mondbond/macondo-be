@@ -21,7 +21,7 @@ test_list = [
   },
   {
     "query": "What is the capital of France?",
-    "intention": UserIntentionEnum.NOT_RELATED.name
+    "intention": UserIntentionEnum.OTHER_FINANCIAL_QUESTIONS.name
   },
   {
     "query": "Give me the recent news about Amazon's market performance. ticker AMZN",
@@ -37,7 +37,7 @@ test_list = [
   },
   {
     "query": "Tell me a joke about programmers.",
-    "intention": UserIntentionEnum.NOT_RELATED.name
+    "intention": UserIntentionEnum.OTHER_FINANCIAL_QUESTIONS.name
   }
 
 ]

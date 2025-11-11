@@ -1,7 +1,24 @@
-from src.service.graph.intention_service import classify_intent_with_prompt
-from src.util.logger import logger
 
+test_list = [
+    {
+        "query": "What's the latest news on Apple Inc.?",
+        "intention": "NEWS_ABOUT_COMPANY"
+    },
+    {
+        "query": "Can you provide the financial report for Microsoft?",
+        "intention": "COMPANY_INFORMATION_FROM_REPORT"
+    },
+    {
+        "query": "How did Tesla's stock perform last week?",
+        "intention": "ANALYSE_SHARE_PRISE"
+    },
+    {
+        "query": "What is the capital of France?",
+        "intention": "NOT_RELATED"
+    },
+]
 
+# Main evaluation and metrics calculation for route classification
 
 def evaluate_route_classification(classify_intent_func):
     results = []
@@ -27,15 +44,11 @@ def calculate_classification_metrics(results):
     total = len(results)
     correct = sum(1 for r in results if r['is_correct'])
     accuracy = correct / total if total else 0
-
-    # Collect all unique intentions
     intentions = {r['expected_intention'] for r in results} | {r['predicted_intention'] for r in results}
-    # Initialize counters
     tp = defaultdict(int)
     fp = defaultdict(int)
     fn = defaultdict(int)
     support = defaultdict(int)
-
     for r in results:
         pred = r['predicted_intention']
         exp = r['expected_intention']
@@ -45,8 +58,6 @@ def calculate_classification_metrics(results):
         else:
             fp[pred] += 1
             fn[exp] += 1
-
-    # Calculate recall and precision for each intention
     recall_per_intention = {}
     precision_per_intention = {}
     for intent in intentions:
@@ -54,11 +65,8 @@ def calculate_classification_metrics(results):
         precision = tp[intent] / (tp[intent] + fp[intent]) if (tp[intent] + fp[intent]) else 0
         recall_per_intention[intent] = recall
         precision_per_intention[intent] = precision
-
-    # Macro averages
     macro_recall = sum(recall_per_intention.values()) / len(intentions) if intentions else 0
     macro_precision = sum(precision_per_intention.values()) / len(intentions) if intentions else 0
-
     return {
         'accuracy': accuracy,
         'macro_recall': macro_recall,
@@ -67,10 +75,3 @@ def calculate_classification_metrics(results):
         'precision_per_intention': precision_per_intention,
         'support': dict(support)
     }
-
-
-if __name__ == "__main__":
-  results = evaluate_route_classification(classify_intent_with_prompt)
-  logger.info(results)
-  metrics = calculate_classification_metrics(results)
-  logger.info(metrics)

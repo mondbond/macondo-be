@@ -6,7 +6,6 @@ from src.util.logger import logger
 
 class PromptManager:
   def __init__(self, prompts_dir: str = "resources/prompts"):
-    # Resolve path relative to this file if not absolute
     base_dir = Path(__file__).parent.parent.parent  # src/util -> project root
     prompts_path = Path(prompts_dir)
     if not prompts_path.is_absolute():
@@ -66,11 +65,3 @@ class PromptManager:
     return [{"version": v["version"], "alias": v.get("alias"), "description": v.get("description")} for v in prompt_entry["versions"]]
 
 prompt_manager = PromptManager()
-
-
-if __name__ == "__main__":
-  pm = PromptManager()
-  logger.info(pm.list_prompts())
-  prompt_text = pm.get_prompt("context_based_answer")
-  logger.info(prompt_text)
-  logger.info(pm.list_versions("example_prompt"))

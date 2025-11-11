@@ -13,7 +13,6 @@ logger.add(
            "<level>{message}</level>"
 )
 
-
 def log_time(func):
 
     def wrapper(*args, **kwargs):

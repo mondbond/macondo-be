@@ -3,23 +3,22 @@ from langchain.llms.base import LLM
 from typing import Optional, List
 from src.util.logger import logger
 
-# Not used currently, but could be extended for more features
+# OllamaClient for interfacing with Ollama LLM API
 class OllamaClient(LLM):
     model: str = "mistral:instruct"
+    # hardcoded localhost for now; can be overridden
     base_url: str = "http://localhost:11434"
     verbose: bool = True
 
     def _call(self, prompt: str, stop: Optional[List[str]] = None, **kwargs) -> str:
         if hasattr(prompt, "to_string"):
-          prompt = prompt.to_string()
+            prompt = prompt.to_string()
 
         logger.info("=====OLLAMA PROMPT=====")
         logger.info(prompt)
         logger.info("========================")
 
-        headers = {
-            "Content-Type": "application/json",
-        }
+        headers = {"Content-Type": "application/json"}
         payload = {
             "model": self.model,
             "prompt": prompt,

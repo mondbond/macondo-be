@@ -1,6 +1,4 @@
 from transformers import CLIPProcessor, CLIPModel
-import torch
-from PIL import Image
 import chromadb
 
 # Load model + processor

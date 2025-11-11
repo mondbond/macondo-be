@@ -92,24 +92,3 @@ graph.add_edge("run_intent", "answer_node")
 graph.add_edge("answer_node", "update_history")
 
 route_app = graph.compile()
-
-
-if __name__ == "__main__":
-
-  # logger.info(route_app.get_graph().draw_mermaid())
-
-  import asyncio
-
-  async def main():
-    state = RouterState(
-        user_message="My name is Ivan",
-    )
-    result = await route_app.ainvoke(state)
-
-    state = RouterState(
-        user_message="Do you remember me name?",
-    )
-    result = await route_app.ainvoke(state)
-    logger.info("🤖 Bot:", result["bot_message"])
-
-  asyncio.run(main())

@@ -3,7 +3,6 @@ from pypdf import PdfReader
 from io import BytesIO
 
 from bs4 import BeautifulSoup
-from src.util.logger import logger
 from docling.document_converter import DocumentConverter
 
 def any_format_to_str(file, content_type):
@@ -45,7 +44,3 @@ def parse_text_by_docling(file):
     # return result.document.export_to_text()
     # return result.document.export_to_dict()
 
-
-if __name__ == "__main__":
-    # logger.info(parse_text_by_docling("/Users/ibahr/Desktop/reports/AAPL.html"))
-    logger.info(any_format_to_str("/Users/ibahr/Desktop/reports/AAPL.html", "text/html"))

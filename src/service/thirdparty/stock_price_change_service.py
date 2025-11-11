@@ -90,8 +90,6 @@ class PriceFactory():
     return ticker_change_map
 
 
-
-
 class PriceProvider(ABC):
 
   @abstractmethod
@@ -149,7 +147,6 @@ class PriceProviderFinHub(PriceProvider):
 
 price_provider1 = PriceProviderFinHub(FINNHUB_API_KEY)
 price_provider2 = PriceProviderTwelveData(TWELVE_DATA_API_KEY)
-
 
 
 def get_price_change_for_tickers(tickers: [str]):

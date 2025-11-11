@@ -1,0 +1,11 @@
+prompt_name: fin_report_route
+description: Text resource to input in data resource for fin_report_route
+versions:
+  - version: 1
+    alias: base
+    description:
+    template: |
+      In fin report, In financial report, annual stock report, 10-K, quarterly stock report, 10-Q, and other financial documents, report, reporting.
+      
+      
+    

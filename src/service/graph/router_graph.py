@@ -95,6 +95,9 @@ route_app = graph.compile()
 
 
 if __name__ == "__main__":
+
+  # logger.info(route_app.get_graph().draw_mermaid())
+
   import asyncio
 
   async def main():

@@ -1,0 +1,11 @@
+prompt_name: company_news_route
+description: Text resource to input in data resource for company_news_route
+versions:
+  - version: 1
+    alias: base
+    description:
+    template: |
+        In company news, latest news, what's new, recent news, current news, breaking news, headlines, updates, announcements, press releases, media coverage, news articles, news stories, news reports, corporate news, business news, industry news, market news, financial news, economic news, global news, local news, national news.
+      
+      
+    

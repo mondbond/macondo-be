@@ -1,0 +1,9 @@
+prompt_name: company_price_fall_route
+description: Text resource to input in data resource for company_price_fall_route
+versions:
+  - version: 1
+    alias: base
+    description:
+    template: |
+        In company price fall, analysis, fall analysis, stock price drop, share price decline, market value decrease, equity value reduction, stock market downturn, financial loss, investment loss, portfolio depreciation, asset devaluation, market fluctuation, economic downturn, recession impact, industry slump, sector decline, market correction, trading halt, stock sell-off, investor panic, market volatility.
+    

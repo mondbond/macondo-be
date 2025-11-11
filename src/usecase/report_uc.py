@@ -14,6 +14,7 @@ def save_report(file, metadata, content_type):
 
 def save_text_report(text, metadata):
   chunks = text_to_semantic_splitting(text)
+  # chunks = text_to_recursive_splitting(text)
   logger.info(f"Total chunks created: {len(chunks)}")
 
   db_client.add_new_report(chunks, metadata)

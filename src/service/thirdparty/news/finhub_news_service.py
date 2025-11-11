@@ -1,12 +1,11 @@
 from newspaper import Article
 
-from src.util.env_property import get_env_property
+from src.util.env_property import FINNHUB_API_KEY
 import finnhub
 from datetime import datetime, timedelta
 import time
 from src.util.logger import logger
 
-FINNHUB_API_KEY = get_env_property("FINNHUB_API_KEY", "sandbox_c0m8n2qad3i8e1f5g5g0")
 
 finnhub_client = finnhub.Client(api_key=FINNHUB_API_KEY)
 

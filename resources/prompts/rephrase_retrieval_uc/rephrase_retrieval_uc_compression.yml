@@ -10,4 +10,4 @@ versions:
       You need to make shorter version of the data not bigger that provided size.
       Priority of summarizing the content:
       1 - Filter out information from the data that is not relevant to the question. Keep relevant information only.
-      2 - If data size is stll bigger then treshold - summarise the  existed data to make it fit in the treshold
+      2 - If data size is still bigger then treshold - summarise the  existed data to make it fit in the treshold

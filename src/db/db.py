@@ -11,6 +11,7 @@ from langchain_experimental.open_clip import OpenCLIPEmbeddings
 
 from chromadb import Client
 from src.llm.llm_provider import get_llm
+from src.models.router import UserIntentionEnum
 from src.util.prompt_manager import prompt_manager
 from src.util.logger import logger
 
@@ -62,10 +63,26 @@ class FinReportVectorDB(abc.ABC):
     def search_image_embedd(self, query: str, top_k=3):
       pass
 
+    @abstractmethod
+    def define_route(self, query):
+      pass
+
 class InMemoryFinReportVectorDBReport(FinReportVectorDB):
 
     def __init__(self):
         transformer_fn = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+
+        self.route_db = Chroma(
+            collection_name="routing",
+            embedding_function=transformer_fn)
+
+        self.route_db.add_texts([prompt_manager.get_prompt("company_news_route")], metadatas=[{"route": UserIntentionEnum.NEWS_ABOUT_COMPANY.name}], ids=["INIT_0"])
+        self.route_db.add_texts([prompt_manager.get_prompt("company_price_fall_route")], metadatas=[{"route": UserIntentionEnum.ANALYSE_SHARE_PRISE.name}], ids=["INIT_1"])
+        self.route_db.add_texts([prompt_manager.get_prompt("fin_report_route")], metadatas=[{"route": UserIntentionEnum.COMPANY_INFORMATION_FROM_REPORT.name}], ids=["INIT_2"])
+        self.route_db.add_texts([prompt_manager.get_prompt("other_financial_route")], metadatas=[{"route": UserIntentionEnum.OTHER_FINANCIAL_QUESTIONS.name}], ids=["INIT_3"])
+
+        self.define_route("What is the latest news about Apple Inc.?")
+
 
         self.report_db = Chroma(
             collection_name="report",
@@ -76,6 +93,10 @@ class InMemoryFinReportVectorDBReport(FinReportVectorDB):
             embedding_function=clip_embedder)
 
         self.embed_image_db = Client().get_or_create_collection("embed_image")
+
+    def define_route(self, query):
+      result = self.route_db.search(query, search_type="similarity", k=1)
+      return UserIntentionEnum.from_str(result[0].metadata['route'])
 
     def get_existing_reports(self):
       results = self.report_db.get(include=["metadatas"])

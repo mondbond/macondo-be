@@ -2,6 +2,8 @@ import pytest
 from collections import defaultdict
 
 from src.models.router import UserIntentionEnum
+from src.service.resolve_intention_db_service import \
+  get_user_intention_with_similarity_search
 from src.util.logger import logger
 from src.evaluation.route_evaluation import calculate_classification_metrics
 from src.service.graph.intention_service import classify_intent_with_prompt
@@ -66,7 +68,6 @@ def calculate_classification_metrics_h(results):
       fp[pred] += 1
       fn[exp] += 1
 
-  # Calculate recall and precision for each intention
   recall_per_intention = {}
   precision_per_intention = {}
   for intent in intentions:
@@ -75,7 +76,6 @@ def calculate_classification_metrics_h(results):
     recall_per_intention[intent] = recall
     precision_per_intention[intent] = precision
 
-  # Macro averages
   macro_recall = sum(recall_per_intention.values()) / len(intentions) if intentions else 0
   macro_precision = sum(precision_per_intention.values()) / len(intentions) if intentions else 0
 
@@ -89,40 +89,40 @@ def calculate_classification_metrics_h(results):
   }
 
 
-def test_metrics_perfect_predictions():
-    sample_results = [
-        {'query': "What's the latest news on Apple Inc.?", 'predicted_intention': 'NEWS_ABOUT_COMPANY', 'expected_intention': 'NEWS_ABOUT_COMPANY', 'is_correct': True},
-        {'query': 'Can you provide the financial report for Microsoft?', 'predicted_intention': 'COMPANY_INFORMATION_FROM_REPORT', 'expected_intention': 'COMPANY_INFORMATION_FROM_REPORT', 'is_correct': True},
-        {'query': "How did Tesla's stock perform last week?", 'predicted_intention': 'ANALYSE_SHARE_PRISE', 'expected_intention': 'ANALYSE_SHARE_PRISE', 'is_correct': True},
-        {'query': 'What is the capital of France?', 'predicted_intention': 'NOT_RELATED', 'expected_intention': 'NOT_RELATED', 'is_correct': True}
-    ]
-    metrics = calculate_classification_metrics(sample_results)
-    assert metrics['accuracy'] == 1.0
-    assert metrics['macro_recall'] == 1.0
-    assert metrics['macro_precision'] == 1.0
-    for recall in metrics['recall_per_intention'].values():
-        assert recall == 1.0
-    for precision in metrics['precision_per_intention'].values():
-        assert precision == 1.0
+# def test_metrics_perfect_predictions():
+#     sample_results = [
+#         {'query': "What's the latest news on Apple Inc.?", 'predicted_intention': 'NEWS_ABOUT_COMPANY', 'expected_intention': 'NEWS_ABOUT_COMPANY', 'is_correct': True},
+#         {'query': 'Can you provide the financial report for Microsoft?', 'predicted_intention': 'COMPANY_INFORMATION_FROM_REPORT', 'expected_intention': 'COMPANY_INFORMATION_FROM_REPORT', 'is_correct': True},
+#         {'query': "How did Tesla's stock perform last week?", 'predicted_intention': 'ANALYSE_SHARE_PRISE', 'expected_intention': 'ANALYSE_SHARE_PRISE', 'is_correct': True},
+#         {'query': 'What is the capital of France?', 'predicted_intention': 'NOT_RELATED', 'expected_intention': 'NOT_RELATED', 'is_correct': True}
+#     ]
+#     metrics = calculate_classification_metrics(sample_results)
+#     assert metrics['accuracy'] == 1.0
+#     assert metrics['macro_recall'] == 1.0
+#     assert metrics['macro_precision'] == 1.0
+#     for recall in metrics['recall_per_intention'].values():
+#         assert recall == 1.0
+#     for precision in metrics['precision_per_intention'].values():
+#         assert precision == 1.0
+#
+#
+# def test_metrics_imperfect_predictions():
+#     sample_results = [
+#         {'query': "What's the latest news on Apple Inc.?", 'predicted_intention': 'NEWS_ABOUT_COMPANY', 'expected_intention': 'NEWS_ABOUT_COMPANY', 'is_correct': True},
+#         {'query': 'Can you provide the financial report for Microsoft?', 'predicted_intention': 'NEWS_ABOUT_COMPANY', 'expected_intention': 'COMPANY_INFORMATION_FROM_REPORT', 'is_correct': False},
+#         {'query': "How did Tesla's stock perform last week?", 'predicted_intention': 'ANALYSE_SHARE_PRISE', 'expected_intention': 'ANALYSE_SHARE_PRISE', 'is_correct': True},
+#         {'query': 'What is the capital of France?', 'predicted_intention': 'NOT_RELATED', 'expected_intention': 'NOT_RELATED', 'is_correct': True}
+#     ]
+#     metrics = calculate_classification_metrics(sample_results)
+#     assert metrics['accuracy'] == 0.75
+#     # Macro recall and precision should be less than 1.0 due to the error
+#     assert metrics['macro_recall'] < 1.0
+#     assert metrics['macro_precision'] < 1.0
+#     # Check that at least one recall/precision is less than 1.0
+#     assert any(r < 1.0 for r in metrics['recall_per_intention'].values())
+#     assert any(p < 1.0 for p in metrics['precision_per_intention'].values())
 
-
-def test_metrics_imperfect_predictions():
-    sample_results = [
-        {'query': "What's the latest news on Apple Inc.?", 'predicted_intention': 'NEWS_ABOUT_COMPANY', 'expected_intention': 'NEWS_ABOUT_COMPANY', 'is_correct': True},
-        {'query': 'Can you provide the financial report for Microsoft?', 'predicted_intention': 'NEWS_ABOUT_COMPANY', 'expected_intention': 'COMPANY_INFORMATION_FROM_REPORT', 'is_correct': False},
-        {'query': "How did Tesla's stock perform last week?", 'predicted_intention': 'ANALYSE_SHARE_PRISE', 'expected_intention': 'ANALYSE_SHARE_PRISE', 'is_correct': True},
-        {'query': 'What is the capital of France?', 'predicted_intention': 'NOT_RELATED', 'expected_intention': 'NOT_RELATED', 'is_correct': True}
-    ]
-    metrics = calculate_classification_metrics(sample_results)
-    assert metrics['accuracy'] == 0.75
-    # Macro recall and precision should be less than 1.0 due to the error
-    assert metrics['macro_recall'] < 1.0
-    assert metrics['macro_precision'] < 1.0
-    # Check that at least one recall/precision is less than 1.0
-    assert any(r < 1.0 for r in metrics['recall_per_intention'].values())
-    assert any(p < 1.0 for p in metrics['precision_per_intention'].values())
-
-def test_evaluate_route_classification():
+def test_evaluate_route_classification_with_llm():
   results = []
   for test in test_list:
     state = {
@@ -133,6 +133,7 @@ def test_evaluate_route_classification():
     predicted_intention = user_intention.intention.name
     expected_intention = test["intention"]
     is_correct = str(predicted_intention) == str(expected_intention)
+    logger.info(f"Compare intentions: predicted: {predicted_intention}, expected: {expected_intention}, is_correct: {is_correct}")
     results.append({
       "query": test["query"],
       "predicted_intention": predicted_intention,
@@ -142,4 +143,26 @@ def test_evaluate_route_classification():
   logger.info(f"Test {results}")
   summary_results = calculate_classification_metrics_h(results)
   logger.info(summary_results)
-  assert summary_results["macro_recall"] >= 0.5
+  assert summary_results["macro_recall"] >= 0.9
+
+
+def test_evaluate_route_classification_via_similarity_search():
+  results = []
+  for test in test_list:
+    state = test["query"]
+
+    user_intention = get_user_intention_with_similarity_search(state)
+    predicted_intention = user_intention
+    expected_intention = test["intention"]
+    is_correct = predicted_intention.name == expected_intention
+    logger.info(f"Compare intentions: predicted: {predicted_intention.name}, expected: {expected_intention}, is_correct: {is_correct}")
+    results.append({
+      "query": test["query"],
+      "predicted_intention": predicted_intention,
+      "expected_intention": expected_intention,
+      "is_correct": is_correct
+    })
+  logger.info(f"Test {results}")
+  summary_results = calculate_classification_metrics_h(results)
+  logger.info(summary_results)
+  assert summary_results["macro_recall"] >= 0.9

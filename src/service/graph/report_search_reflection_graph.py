@@ -11,7 +11,6 @@ from src.tools.tools import report_rephrase_retriever_search, search_in_report
 from torch.sparse import addmm
 from typing_extensions import TypedDict, Literal
 
-from src.llm import llm_provider
 from src.llm.llm_provider import get_llm
 from src.usecase.report_uc import save_report
 
@@ -40,7 +39,7 @@ def act_node(state: GraphReflectionState) -> GraphReflectionState:
   logger.info(f"ACT NODE - Step {state['counter'] + 1}")
   name2tool = {tool.name: tool for tool in state['tools']}
 
-  llm = llm_provider.get_llm()
+  llm = get_llm()
   llm_tool = llm.bind_tools(state['tools'], tool_choice="any")
 
   query = state['input_query'][-1]
@@ -172,7 +171,7 @@ if __name__ == "__main__":
     }
 
   # save_report(pdf_content, metadata)
-  save_report(pdf_content, metadata)
+  save_report(pdf_content, metadata, 'application/pdf')
 
   query = "What is the main competitor of APPL by it's report?"
   initial_state = GraphReflectionState(

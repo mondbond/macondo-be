@@ -190,6 +190,8 @@ def run_news_graph(ticker, query) -> NewsGraphReflectionState:
 
 if __name__ == "__main__":
 
+  logger.info(app.get_graph().draw_mermaid())
+
   query = "What is the last meaningful news about ORCL Oracle company?"
   initial_state = NewsGraphReflectionState(
       counter=0,

@@ -4,6 +4,7 @@ from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate, Sy
 
 from src.models.mark import ZeroToTenMark
 from src.llm.llm_provider import get_llm
+from src.util.env_property import LLM_SOURCE_REASONING
 from src.util.logger import logger
 
 TASK_NODE = "task_node"
@@ -51,7 +52,7 @@ def task_node(state: ReflectAnswerState) -> ReflectAnswerState:
   return state
 
 def mark_node(state: ReflectAnswerState) -> ReflectAnswerState:
-  llm = get_llm().with_structured_output(ZeroToTenMark)
+  llm = get_llm(specific_source=LLM_SOURCE_REASONING).with_structured_output(ZeroToTenMark)
 
   prompt = ChatPromptTemplate.from_messages([
     SystemMessagePromptTemplate.from_template("{mark_role_prompt}"),
@@ -85,7 +86,7 @@ def resolver_node(state: ReflectAnswerState) -> ReflectAnswerState|str:
   return REVIEW_NODE
 
 def review_node(state: ReflectAnswerState) -> ReflectAnswerState:
-  llm = get_llm()
+  llm = get_llm(specific_source=LLM_SOURCE_REASONING)
 
   prompt = ChatPromptTemplate.from_messages([
     SystemMessagePromptTemplate.from_template("{review_role_prompt}"),

@@ -1,9 +1,9 @@
 from langchain_mcp_adapters.client import MultiServerMCPClient
 
-from src.util.env_property import get_env_property
+from src.util.env_property import MCP_FIN_URL
 from src.util.logger import logger
 
-mcp_url = get_env_property("MCP_FIN_URL")
+mcp_url = MCP_FIN_URL
 logger.info(f"MCP_FIN_URL: {mcp_url}")
 
 

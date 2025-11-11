@@ -52,7 +52,9 @@ class SubqueryRetrievalConfig(TypedDict, total=False):
   original_answer: Optional[str]
 
   last_review: Optional[str]
+  all_reviews: List[str]
   last_mark: Optional[int]
+  all_marks: List[int]
 
   context_threshold: int
   compression_coef: float
@@ -174,7 +176,9 @@ def evaluator_node(state: SubqueryRetrievalConfig) -> SubqueryRetrievalConfig:
       "actual": actual
     })
     state["last_review"] = analysis.reasoning
+    state["all_reviews"].append(analysis.reasoning)
     state["last_mark"] = int(analysis.comparable_numeric_value)
+    state["all_marks"].append(int(analysis.comparable_numeric_value))
   except Exception:
     pass
 
@@ -322,47 +326,49 @@ if __name__ == "__main__":
   # for k in ["LANGSMITH_TRACING", "LANGSMITH_ENDPOINT", "LANGSMITH_API_KEY", "LANGSMITH_PROJECT"]:
   #   logger.info(k, "=", os.getenv(k))
   #
-  # # with open("/Users/ibahr/Downloads/synthetic_report.pdf", "rb") as f:
-  # with open("/Users/ibahr/Desktop/reports/UBER.html", "rb") as f:
-  #   pdf_content = f.read()
-  #   report = soup_html_to_text(pdf_content)
+  # with open("/Users/ibahr/Downloads/synthetic_report.pdf", "rb") as f:
+  with open("/Users/ibahr/Desktop/reports/UBER.html", "rb") as f:
+    pdf_content = f.read()
+    report = soup_html_to_text(pdf_content)
+
+    metadata = {
+      "ticker": "UBER",
+      "date": "2025-07-17"
+    }
+
+  # save_report(pdf_content, metadata)
+  save_text_report(report, metadata)
   #
-  #   metadata = {
-  #     "ticker": "UBER",
-  #     "date": "2025-07-17"
-  #   }
+  initial_state: SubqueryRetrievalConfig = {
+    "ticker": "UBER",
+    "original_question": "What are the key risks for Company Uber in the latest 10-K report?",
+    "original_answer": None,
+
+    "last_review": None,
+    "all_reviews": [],
+    "all_marks": [],
+    "iteration": 0,
+
+    "questions": [],
+    "all_data": [],
+
+    "max_iterations": 3,
+    "min_iterations": 0,
+
+    "context_threshold": 2000,
+    "compression_coef": 0.7,
+
+    "answer_prompt": SystemMessage(prompt_manager.get_prompt("rephrase_retrieval_uc_answer")),
+    "compare_prompt": SystemMessage(prompt_manager.get_prompt('rephrase_retrieval_uc_answer_comparator')),
+    "subquery_prompt": SystemMessage(prompt_manager.get_prompt('rephrase_retrieval_uc_rephrase_question')),
+    "compression_prompt": SystemMessage(prompt_manager.get_prompt("rephrase_retrieval_uc_compression")),
+    "synthetic_answer_prompt": SystemMessage(prompt_manager.get_prompt("rephrase_retrieval_uc_synthetic_answer")),
+
+    "final_answer": None
+  }
   #
-  # # save_report(pdf_content, metadata)
-  # save_text_report(report, metadata)
-  #
-  # initial_state: SubqueryRetrievalConfig = {
-  #   "ticker": "UBER",
-  #   "original_question": "What are the key risks for Company Uber in the latest 10-K report?",
-  #   "original_answer": None,
-  #
-  #   "last_review": None,
-  #   "iteration": 0,
-  #
-  #   "questions": [],
-  #   "all_data": [],
-  #
-  #   "max_iterations": 1,
-  #   "min_iterations": 0,
-  #
-  #   "context_threshold": 2000,
-  #   "compression_coef": 0.7,
-  #
-  #   "answer_prompt": SystemMessage(prompt_manager.get_prompt("rephrase_retrieval_uc_answer")),
-  #   "compare_prompt": SystemMessage(prompt_manager.get_prompt('rephrase_retrieval_uc_answer_comparator')),
-  #   "subquery_prompt": SystemMessage(prompt_manager.get_prompt('rephrase_retrieval_uc_rephrase_question')),
-  #   "compression_prompt": SystemMessage(prompt_manager.get_prompt("rephrase_retrieval_uc_compression")),
-  #   "synthetic_answer_prompt": SystemMessage(prompt_manager.get_prompt("rephrase_retrieval_uc_synthetic_answer")),
-  #
-  #   "final_answer": None
-  # }
-  #
-  # final_state = app.invoke(initial_state)
-  # logger.info("\n=== FINAL STATE ===")
-  # logger.info(final_state)
+  final_state = app.invoke(initial_state)
+  logger.info("\n=== FINAL STATE ===")
+  logger.info(final_state)
   logger.info(app.get_graph().draw_mermaid())
 

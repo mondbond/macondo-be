@@ -11,12 +11,12 @@ from trulens.otel.semconv.trace import SpanAttributes
 from pydantic import BaseModel, Field
 
 from src.llm.llm_provider import get_llm
-from src.models.constants import LLM_CHEEP_SOURCE, LLM_JUDGE_SOURCE
 from src.service.file_format_service import soup_html_to_text
 from src.service.graph.core.subquery_retrieval_graph1 import \
   run_subquery_search_in_report_full_state
 from src.service.query_report_service import base_query_report_question_answer_full_state
 from src.usecase.report_uc import save_text_report
+from src.util.env_property import LLM_SOURCE_JUDGE
 from src.util.prompt_manager import prompt_manager
 from src.util.logger import logger
 from src.util.logger import logger
@@ -43,10 +43,10 @@ with open('/Users/ibahr/Desktop/reports/AAPL.html', 'rb') as f:
 
 # TEST QUESTIONS
 test_question_list = [
-  "What is the main competitor of AAPL by its report",
-  "What is the main product of AAPL",
+  "What is the main business of AAPL?",
+  "What is the main product of AAPL?",
   "What is the last revenue of AAPL",
-  "What is the CEO name of AAPL",
+  "What is the CEO name of AAPL?",
   "What is the main competitor of APPL by it's report?"
 ]
 
@@ -75,7 +75,7 @@ Model answer: {answer}
 """)
 answer_relevance_prompt = ChatPromptTemplate.from_messages([answer_relevance_criteria_prompt, human_prompt])
 
-llm_aw = get_llm(specific_source=LLM_JUDGE_SOURCE).with_structured_output(EvaluationScore) | RunnableLambda(extract_score)
+llm_aw = get_llm(specific_source=LLM_SOURCE_JUDGE).with_structured_output(EvaluationScore) | RunnableLambda(extract_score)
 answer_relevance_criteria_chain = LLMChain(llm=llm_aw, prompt=answer_relevance_prompt, verbose=True)
 
 
@@ -88,7 +88,7 @@ Your groundedness score (0.0 to 1.0):
 """)
 
 groundedness_prompt = ChatPromptTemplate.from_messages([groundedness_criteria_prompt, groundedness_human_prompt])
-llm_g = get_llm(specific_source=LLM_JUDGE_SOURCE).with_structured_output(EvaluationScore) | RunnableLambda(extract_score)
+llm_g = get_llm(specific_source=LLM_SOURCE_JUDGE).with_structured_output(EvaluationScore) | RunnableLambda(extract_score)
 groundedness_criteria_chain = LLMChain(llm=llm_g, prompt=groundedness_prompt, verbose=True)
 
 
@@ -100,14 +100,14 @@ Model context: {context}
 """)
 context_relevance_prompt = ChatPromptTemplate.from_messages([context_relevance_criteria_prompt, context_prompt])
 
-llm_cr = get_llm(specific_source=LLM_JUDGE_SOURCE).with_structured_output(EvaluationScore) | RunnableLambda(extract_score)
+llm_cr = get_llm(specific_source=LLM_SOURCE_JUDGE).with_structured_output(EvaluationScore) | RunnableLambda(extract_score)
 context_relevance_criteria_chain = LLMChain(llm=llm_cr, prompt=context_relevance_prompt,  verbose=True)
 
 
 # METRIC FUNCTIONS
 def custom_relevance(prompt: str, res: dict) -> str:
   res = json.loads(res)
-  time.sleep(10)
+  time.sleep(20)
   final_answer = answer_relevance_criteria_chain.invoke({"question": res['question'], "answer": res['final_answer']})
   logger.info(f"Relevance score: {final_answer}")
 
@@ -116,7 +116,7 @@ def custom_relevance(prompt: str, res: dict) -> str:
 
 def custom_groundedness(prompt: str, res: dict) -> str:
   res = json.loads(res)
-  time.sleep(10)
+  time.sleep(20)
   answer = res['final_answer']
   context = res['context']
   final_answer = groundedness_criteria_chain.invoke({"context": context, "answer": answer})
@@ -127,7 +127,7 @@ def custom_groundedness(prompt: str, res: dict) -> str:
 
 def custom_contex_relevance(prompt: str, res: dict) -> str:
   res = json.loads(res)
-  time.sleep(10)
+  time.sleep(20)
   question = res['question']
   context = res['context']
   final_answer = context_relevance_criteria_chain.invoke({"question": question, "context": context})

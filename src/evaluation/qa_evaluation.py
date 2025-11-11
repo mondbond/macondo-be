@@ -1,6 +1,6 @@
 from evaluate import load
 
-from src.service.file_format_service import soup_html_to_text
+from src.service.file_format_service import soup_html_to_text, any_format_to_str
 from src.service.graph.core.subquery_retrieval_graph1 import \
   run_subquery_search_in_report_full_state
 from src.service.query_report_service import \
@@ -13,7 +13,8 @@ from src.evaluation.test_util import get_qa_test_json
 
 with open("/Users/ibahr/Desktop/reports/AAPL.html", "rb") as f:
   pdf_content = f.read()
-  report = soup_html_to_text(pdf_content)
+  # report = soup_html_to_text(pdf_content)
+  report = any_format_to_str(pdf_content, "text/html")
 
   metadata = {
     "ticker": "AAPL",
@@ -32,8 +33,8 @@ references = []
 
 for item_map in test_data:
     logger.info(f"Evaluating question: {item_map['question']}")
-    result = run_subquery_search_in_report_full_state(ticker="AAPL", question=item_map['question'])['final_answer']
-    # result = base_query_report_question_answer_full_state(ticker="AAPL", query=item_map['question'])['answer']
+    # result = run_subquery_search_in_report_full_state(ticker="AAPL", question=item_map['question'])['final_answer']
+    result = base_query_report_question_answer_full_state(ticker="AAPL", query=item_map['question'])['answer']
     # answer = result.get("final_answer", "") if isinstance(result, dict) else str(result)
     answers.append(str(result))
     questions.append(item_map['question'])

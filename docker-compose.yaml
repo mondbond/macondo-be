@@ -12,7 +12,7 @@ services:
       - LLM_SOURCE=ollama
       - LLM_CHEAP_SOURCE=ollama
       - LLM_REASONING_SOURCE=ollama
-      - MCP_FIN_URL=
+      - MCP_FIN_URL=http://localhost:8887/mcp
       - LANGSMITH_TRACING=true
       - LANGSMITH_ENDPOINT=https://api.smith.langchain.com
       - LANGSMITH_API_KEY=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

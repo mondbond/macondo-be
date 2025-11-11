@@ -12,6 +12,7 @@ from typing_extensions import TypedDict
 import os
 from src.llm import llm_provider
 from src.usecase.report_uc import save_text_report
+from src.util.env_property import LLM_SOURCE_REASONING
 from src.util.prompt_manager import prompt_manager
 from src.util.logger import logger
 
@@ -157,10 +158,10 @@ def generate_verdict_node(state: GraphFallExplainState) -> GraphFallExplainState
     review_role_prompt = REVIEW_ROLE_PROMPT,
 
     max_iterations = 3,
-    accepted_mark = 9
+    accepted_mark = 8
     )
 
-    llm = llm_provider.get_llm().with_structured_output(NegativeFiveToFiveMark)
+    llm = llm_provider.get_llm(specific_source=LLM_SOURCE_REASONING).with_structured_output(NegativeFiveToFiveMark)
     prompt = ChatPromptTemplate.from_messages([
         ("system", REASON_PROMPT),
         ("human", """
@@ -168,7 +169,7 @@ def generate_verdict_node(state: GraphFallExplainState) -> GraphFallExplainState
           Change: {change}%
           Analytical summary: {analytical_summary}
 
-          Please provide a verdict in a mark form if I should but the stock share right now or not.
+          Please provide a verdict in a mark form if I should buy the stock share right now or not.
           """)
       ])
 
@@ -257,46 +258,45 @@ if __name__ == "__main__":
   # #
   # # # save_report(pdf_content, metadata)
   # # save_text_report(report, metadata)
-  # tickers = []
-  # folder = "/Users/ibahr/Desktop/reports"
-  # for filename in os.listdir(folder):
-  #   logger.info(filename)
-  #   ticker = filename.split('.')[0]
-  #   tickers.append(ticker)
-  #   with open(folder + '/' + filename, "rb") as f:
-  #     report = f.read()
-  #   report = soup_html_to_text(report)
-  #   metadata = {
-  #     "ticker": ticker,
-  #     "date": "2025-07-17"
-  #   }
-  #   # save_report(pdf_content, metadata)
-  #   save_text_report(report, metadata)
-  #   tickers = [
-  #     # 'ORCL',
-  #     #          'SOFI',
-  #              # 'OKTA',
-  #              # 'FICO',
-  #              # 'IONQ',
-  #              # 'PGY',
-  #              # 'MU',
-  #              'AAPL',
-  #              # 'UBER',
-  #              # 'TOST',
-  #              # 'RKLB',
-  #              # 'AMZN',
-  #              # 'RGTI'
-  #              ]
-  #
-  # initial_state = GraphFallExplainState(
-  #     tickers_to_check=tickers,
-  #     # tickers_to_check=['UBER'],
-  #     company_fall_explanation=[]
-  # )
-  #
-  #
-  # final_state = app.invoke(initial_state)
-  # logger.info("Final State:", final_state)
+  tickers = []
+  folder = "/Users/ibahr/Desktop/reports"
+  for filename in os.listdir(folder):
+    logger.info(filename)
+    ticker = filename.split('.')[0]
+    tickers.append(ticker)
+    with open(folder + '/' + filename, "rb") as f:
+      report = f.read()
+    report = soup_html_to_text(report)
+    metadata = {
+      "ticker": ticker,
+      "date": "2025-07-17"
+    }
+    # save_report(pdf_content, metadata)
+    save_text_report(report, metadata)
+    tickers = [
+      'ORCL',
+      #          'SOFI',
+               # 'OKTA',
+               # 'FICO',
+               # 'IONQ',
+               # 'PGY',
+               # 'MU',
+               # 'AAPL',
+               # 'UBER',
+               # 'TOST',
+               # 'RKLB',
+               # 'AMZN',
+               # 'RGTI'
+               ]
+
+  initial_state = GraphFallExplainState(
+      tickers_to_check=tickers,
+      # tickers_to_check=['UBER'],
+      company_fall_explanation=[]
+  )
+
+
+  final_state = app.invoke(initial_state)
+  logger.info(f"Final State: {final_state}")
   # logger.info(final_state['final_answer'])
-  logger.info(app.get_graph().draw_mermaid())
 

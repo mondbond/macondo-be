@@ -52,6 +52,8 @@ torch = "^2.9.0"
 torchvision = "^0.24.0"
 transformers = "^4.57.1"
 open-clip-torch = "^3.2.0"
+python-decouple = "^3.8"
+langchain-google-genai = "2.1.12"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

@@ -1,0 +1,11 @@
+prompt_name: other_financial_route
+description: Text resource to input in data resource for other_financial_route
+versions:
+  - version: 1
+    alias: base
+    description:
+    template: |
+        Other, different, wikipedia, knowledge, information, details, data, facts, figures, statistics, insights, analysis, research, studies, reports, articles, papers, publications, books, journals, magazines, newspapers, blogs, forums, websites, online resources, digital content, multimedia, videos, podcasts, webinars, presentations, slideshows.
+      
+      
+    

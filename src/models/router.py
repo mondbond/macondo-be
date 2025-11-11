@@ -8,6 +8,13 @@ class UserIntentionEnum(str, Enum):
   OTHER_FINANCIAL_QUESTIONS = "OTHER_FINANCIAL_QUESTIONS"
   ANALYSE_SHARE_PRISE = "ANALYSE_SHARE_PRISE"
 
+  @classmethod
+  def from_str(cls, value: str):
+    for member in cls:
+      if member.value.lower() == value.lower():
+        return member
+    raise ValueError(f"Unknown intention: {value}")
+
 class RouterDto(BaseModel):
   """
 RouterDto is the structured output that determines:

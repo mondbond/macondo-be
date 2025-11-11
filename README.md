@@ -1,34 +1,38 @@
-Macondo Backend
-Macondo Backend is a Python-based service for conversational AI, integrating LangChain, FastAPI, and MCP tools. It supports async agent workflows and tool invocation for structured chat and financial queries.
+# Macondo Backend
 
+Macondo Backend is a Python-based backend service designed for advanced question answering, retrieval-augmented generation (RAG), and evaluation of large language model (LLM) outputs. It provides a modular architecture for integrating various LLM providers, embedding models, and evaluation pipelines, supporting both research and production use cases in natural language processing.
 
-Features
-FastAPI REST endpoints for chat and agent interaction
-LangChain agent integration with async support
-MCP tool loading and invocation
-Docker-ready for local and cloud deployment
-Requirements
-Python 3.10+
-pip install -U langchain-community fastapi uvicorn
-MCP service running and accessible
-Quick Start
-Clone the repo:
+## Features
 
+- **Question Answering & RAG**: Supports context-based answering, financial data extraction, and company news retrieval using LLMs and vector search.
+- **Evaluation Suite**: Includes tools for evaluating answer relevance, context relevance, groundedness, and intent classification.
+- **Extensible Prompt Management**: Prompts are organized by use case and can be easily extended or customized.
+- **Image Embedding**: Supports storing and searching image embeddings for multimodal applications.
+- **Chat Memory**: Summarized chat history memory for conversational agents.
+- **Agent Routing**: Modular agent routing for different user intentions and tasks.
+- **File Format Handling**: Converts and parses various file formats for ingestion and processing.
+- **Logging & Configuration**: Centralized logging and environment configuration utilities.
 
-git clone https://github.com/mondbond/macondo-be.git
-cd macondo-be
-Install dependencies:
+## Project Structure
 
+- `src/`: Main source code, including adapters, database, evaluation, LLM integration, models, services, tools, use cases, and utilities.
+- `resources/`: Prompt templates and test data for various tasks and agents.
+- `tests/`: Unit and integration tests for core modules.
+- `.env` files: Environment variable configuration for different deployment scenarios.
 
-pip install -r requirements.txt
-Start MCP service
-Ensure MCP is running and accessible at the configured URL (e.g., http://mond_mcp:8887/mcp).
+## Dependencies
 
+- **Python 3.10+**
+- **FastAPI**: For serving API endpoints.
+- **LangChain**: For LLM orchestration and agent management.
+- **Pydantic**: For data validation and settings management.
+- **Boto3**: For AWS Bedrock and S3 integration.
+- **Matplotlib**: For evaluation result visualization.
+- **Pillow**: For image processing.
+- **Requests**: For HTTP requests.
+- **Poetry**: For dependency management.
+- **Other**: See `pyproject.toml` and `poetry.lock` for the full list.
 
-Run the backend:
+---
 
-
-uvicorn src.main:app --host 0.0.0.0 --port 8000
-Usage
-Send POST requests to /chat/ with your message payload.
-The backend will process the request using LangChain agents and MCP tools.
+For more details on specific modules, prompts, or evaluation workflows, refer to the source code and prompt templates in the `resources/` directory.
